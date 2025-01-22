@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.jaysabva.woc_crs.service.AdminService;
 import org.jaysabva.woc_crs.dto.StudentDto;
 import org.jaysabva.woc_crs.dto.ProfessorDto;
+import org.jaysabva.woc_crs.dto.SemesterDto;
+
+import java.util.*;
 
 @RestController
 @RequestMapping("/admin")
@@ -69,6 +72,30 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/add-semester")
+    public ResponseEntity<String> addSemester(@RequestBody SemesterDto semesterDto) {
+        try {
+            String resultMessage = adminService.addSemester(semesterDto);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/get-all-semesters")
+    public ResponseEntity<List<SemesterDto>> getAllSemesters() {
+        try {
+            List<SemesterDto> semesters = adminService.getAllSemesters();
+
+            return ResponseEntity.status(HttpStatus.OK).body(semesters);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ArrayList<>());
         }
     }
 }

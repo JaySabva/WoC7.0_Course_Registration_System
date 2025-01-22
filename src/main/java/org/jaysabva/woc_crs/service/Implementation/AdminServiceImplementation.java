@@ -1,5 +1,6 @@
 package org.jaysabva.woc_crs.service.Implementation;
 
+import org.jaysabva.woc_crs.repository.SemesterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,6 +14,10 @@ import org.jaysabva.woc_crs.dto.StudentDto;
 import org.jaysabva.woc_crs.repository.StudentRepository;
 import org.jaysabva.woc_crs.dto.ProfessorDto;
 import org.jaysabva.woc_crs.repository.ProfessorRepository;
+import org.jaysabva.woc_crs.dto.SemesterDto;
+import org.jaysabva.woc_crs.entity.Semester;
+
+import java.util.*;
 
 @Service
 public class AdminServiceImplementation implements AdminService {
@@ -20,10 +25,12 @@ public class AdminServiceImplementation implements AdminService {
     @Autowired
     private StudentRepository studentRepository;
     private ProfessorRepository professorRepository;
+    private SemesterRepository semesterRepository;
 
-    public AdminServiceImplementation(StudentRepository studentRepository, ProfessorRepository professorRepository) {
+    public AdminServiceImplementation(StudentRepository studentRepository, ProfessorRepository professorRepository, SemesterRepository semesterRepository) {
         this.studentRepository = studentRepository;
         this.professorRepository = professorRepository;
+        this.semesterRepository = semesterRepository;
     }
 
     @Override
@@ -100,5 +107,45 @@ public class AdminServiceImplementation implements AdminService {
         professorRepository.deleteByEmail(email);
 
         return "Professor deleted successfully";
+    }
+
+    @Override
+    public String addSemester(SemesterDto semesterDto) {
+        if (semesterRepository.findBySemesterName(semesterDto.semesterName()) != null) {
+            throw new IllegalArgumentException("Semester with this name already exists");
+        }
+
+        Semester semester = new Semester(
+            semesterDto.id(),
+            semesterDto.semesterName(),
+            semesterDto.startDate(),
+            semesterDto.endDate()
+        );
+
+        try {
+            semesterRepository.save(semester);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Failed to add semester due to database constraints");
+        }
+
+        return "Semester added successfully";
+    }
+
+    @Override
+    public List<SemesterDto> getAllSemesters() {
+        List<Semester> semesters = semesterRepository.findAll();
+        List<SemesterDto> semesterDtos = new ArrayList<>();
+
+        for (Semester semester : semesters) {
+            SemesterDto semesterDto = new SemesterDto(
+                semester.getId(),
+                semester.getSemesterName(),
+                semester.getStartDate().toString(),
+                semester.getEndDate().toString()
+            );
+            semesterDtos.add(semesterDto);
+        }
+
+        return semesterDtos;
     }
 }
