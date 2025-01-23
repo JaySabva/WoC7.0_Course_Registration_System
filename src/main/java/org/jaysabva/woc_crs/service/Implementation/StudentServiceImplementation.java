@@ -1,10 +1,9 @@
 package org.jaysabva.woc_crs.service.Implementation;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.SynchronizationType;
 import org.jaysabva.woc_crs.dto.RequestDto;
-import org.jaysabva.woc_crs.entity.Course;
-import org.jaysabva.woc_crs.entity.Request;
-import org.jaysabva.woc_crs.repository.CourseRepository;
-import org.jaysabva.woc_crs.repository.RequestRepository;
+import org.jaysabva.woc_crs.entity.*;
+import org.jaysabva.woc_crs.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -12,12 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.jaysabva.woc_crs.service.AdminService;
 
-import org.jaysabva.woc_crs.entity.Student;
-import org.jaysabva.woc_crs.entity.Professor;
 import org.jaysabva.woc_crs.dto.StudentDto;
-import org.jaysabva.woc_crs.repository.StudentRepository;
 import org.jaysabva.woc_crs.dto.ProfessorDto;
-import org.jaysabva.woc_crs.repository.ProfessorRepository;
 import org.jaysabva.woc_crs.service.StudentService;
 
 import java.time.LocalDate;
@@ -33,6 +28,8 @@ public class StudentServiceImplementation implements StudentService{
     private CourseRepository courseRepository;
     @Autowired
     private RequestRepository requestRepository;
+    @Autowired
+    private SemesterRepository semesterRepository;
 
     public StudentServiceImplementation(StudentRepository studentRepository){
         this.studentRepository = studentRepository;
@@ -78,10 +75,16 @@ public class StudentServiceImplementation implements StudentService{
     @Override
     public String requestCourse(RequestDto requestDto){
         Student student = studentRepository.findById(requestDto.studentId()).orElseThrow(() -> new EntityNotFoundException("Student with this id does not exist"));
+        Course course = courseRepository.findById(requestDto.courseIds().get(0).longValue()).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
+        Semester semester = semesterRepository.findById(course.getSemester().getId()).orElseThrow(() -> new EntityNotFoundException("Semester with this id does not exist"));
+
+        if (semester.getRegistrationStatus().equals("Closed")) {
+            throw new IllegalArgumentException("Registration is closed for this semester");
+        }
 
         int semesterXor = 0;
         for (Integer courseId : requestDto.courseIds()) {
-            Course course = courseRepository.findById(Long.valueOf(courseId)).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
+            course = courseRepository.findById(Long.valueOf(courseId)).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
 
             semesterXor ^= course.getSemester().getId();
             if (semesterXor != course.getSemester().getId() && semesterXor != 0) {
