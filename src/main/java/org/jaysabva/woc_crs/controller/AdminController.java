@@ -1,5 +1,7 @@
 package org.jaysabva.woc_crs.controller;
 
+import org.jaysabva.woc_crs.dto.CourseDto;
+import org.jaysabva.woc_crs.entity.Course;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -88,12 +90,88 @@ public class AdminController {
         }
     }
 
+    @PutMapping("/update-semester/{id}")
+    public ResponseEntity<String> updateSemester(@RequestBody SemesterDto semesterDto, @PathVariable Long id) {
+        try {
+            String resultMessage = adminService.updateSemester(semesterDto, id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete-semester/{id}")
+    public ResponseEntity<String> deleteSemester(@PathVariable Long id) {
+        try {
+            String resultMessage = adminService.deleteSemester(id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/get-all-semesters")
     public ResponseEntity<List<SemesterDto>> getAllSemesters() {
         try {
             List<SemesterDto> semesters = adminService.getAllSemesters();
 
             return ResponseEntity.status(HttpStatus.OK).body(semesters);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ArrayList<>());
+        }
+    }
+
+    @PostMapping("/add-course")
+    public ResponseEntity<String> addCourse(@RequestBody CourseDto courseDto) {
+        try {
+            String resultMessage = adminService.addCourse(courseDto);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/update-course/{id}")
+    public ResponseEntity<String> updateCourse(@RequestBody CourseDto courseDto, @PathVariable Long id) {
+        try {
+            String resultMessage = adminService.updateCourse(courseDto, id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete-course/{id}")
+    public ResponseEntity<String> deleteCourse(@PathVariable Long id) {
+        try {
+            String resultMessage = adminService.deleteCourse(id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/get-all-courses")
+    public ResponseEntity<List<Course>> getAllCourses() {
+        try {
+            List<Course> courses = adminService.getAllCourses();
+
+            return ResponseEntity.status(HttpStatus.OK).body(courses);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ArrayList<>());
         }

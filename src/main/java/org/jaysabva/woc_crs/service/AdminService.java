@@ -1,8 +1,11 @@
 package org.jaysabva.woc_crs.service;
 
+import org.jaysabva.woc_crs.dto.CourseDto;
 import org.jaysabva.woc_crs.dto.StudentDto;
 import org.jaysabva.woc_crs.dto.ProfessorDto;
 import org.jaysabva.woc_crs.dto.SemesterDto;
+import org.jaysabva.woc_crs.entity.Course;
+
 import java.util.*;
 
 public interface AdminService {
@@ -17,5 +20,17 @@ public interface AdminService {
 
     String addSemester(SemesterDto semesterDto);
 
+    String updateSemester(SemesterDto semesterDto, Long id);
+
+    String deleteSemester(Long id);
+
     List<SemesterDto> getAllSemesters();
+
+    String addCourse(CourseDto courseDto);
+
+    String updateCourse(CourseDto courseDto, Long id);
+
+    String deleteCourse(Long id);
+
+    List<Course> getAllCourses();
 }

@@ -1,5 +1,9 @@
 package org.jaysabva.woc_crs.service.Implementation;
 
+import jakarta.persistence.EntityNotFoundException;
+import org.jaysabva.woc_crs.dto.CourseDto;
+import org.jaysabva.woc_crs.entity.Course;
+import org.jaysabva.woc_crs.repository.CourseRepository;
 import org.jaysabva.woc_crs.repository.SemesterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,8 @@ public class AdminServiceImplementation implements AdminService {
     private StudentRepository studentRepository;
     private ProfessorRepository professorRepository;
     private SemesterRepository semesterRepository;
+    @Autowired
+    private CourseRepository courseRepository;
 
     public AdminServiceImplementation(StudentRepository studentRepository, ProfessorRepository professorRepository, SemesterRepository semesterRepository) {
         this.studentRepository = studentRepository;
@@ -132,6 +138,39 @@ public class AdminServiceImplementation implements AdminService {
     }
 
     @Override
+    public String updateSemester(SemesterDto semesterDto, Long id) {
+        Semester semester = semesterRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Semester with this id does not exist"));
+
+        if (semesterRepository.findBySemesterName(semesterDto.semesterName()) != null) {
+            throw new IllegalArgumentException("Semester with this name already exists");
+        }
+
+        semester.setSemesterName(semesterDto.semesterName());
+        semester.setStartDate(semesterDto.startDate());
+        semester.setEndDate(semesterDto.endDate());
+
+        try {
+            semesterRepository.save(semester);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Failed to update semester due to database constraints");
+        }
+
+        return "Semester updated successfully";
+    }
+
+    @Override
+    public String deleteSemester(Long id) {
+        Semester semester = semesterRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Semester with this id does not exist"));
+
+        try {
+            semesterRepository.delete(semester);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Failed to delete semester due to database constraints");
+        }
+
+        return "Semester deleted successfully";
+    }
+    @Override
     public List<SemesterDto> getAllSemesters() {
         List<Semester> semesters = semesterRepository.findAll();
         List<SemesterDto> semesterDtos = new ArrayList<>();
@@ -147,5 +186,74 @@ public class AdminServiceImplementation implements AdminService {
         }
 
         return semesterDtos;
+    }
+
+    @Override
+    public String addCourse(CourseDto courseDto) {
+        Professor professor = professorRepository.findById(courseDto.professorId()).orElseThrow(() -> new EntityNotFoundException("Professor with this id does not exist"));
+        Semester semester = semesterRepository.findById(courseDto.semesterId()).orElseThrow(() -> new EntityNotFoundException("Semester with this name does not exist"));
+
+        Course course = new Course(
+            courseDto.id(),
+            courseDto.courseName(),
+            courseDto.courseCode(),
+            courseDto.credit(),
+            courseDto.max_enrollment(),
+            courseDto.curr_enrollment(),
+            professor,
+            semester
+        );
+
+        try {
+            courseRepository.save(course);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Failed to add course due to database constraints");
+        }
+
+        return "Course added successfully";
+    }
+
+    @Override
+    public String updateCourse(CourseDto courseDto, Long id) {
+        Course course = courseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
+
+        Professor professor = professorRepository.findById(courseDto.professorId()).orElseThrow(() -> new EntityNotFoundException("Professor with this id does not exist"));
+        Semester semester = semesterRepository.findById(courseDto.semesterId()).orElseThrow(() -> new EntityNotFoundException("Semester with this name does not exist"));
+
+        course.setCourseName(courseDto.courseName());
+        course.setCourseCode(courseDto.courseCode());
+        course.setCredits(courseDto.credit());
+        course.setMax_enrollment(courseDto.max_enrollment());
+        course.setCurr_enrollment(courseDto.curr_enrollment());
+        course.setProfessor(professor);
+        course.setSemester(semester);
+
+        try {
+            courseRepository.save(course);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Failed to update course due to database constraints");
+        }
+
+        return "Course updated successfully";
+    }
+
+    @Override
+    public String deleteCourse(Long id) {
+        Course course = courseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
+
+        try {
+            courseRepository.delete(course);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Failed to delete course due to database constraints");
+        }
+
+        return "Course deleted successfully";
+    }
+
+    @Override
+    public List<Course> getAllCourses() {
+        List<Course> courses = courseRepository.findAll();
+
+        return courses;
     }
 }
