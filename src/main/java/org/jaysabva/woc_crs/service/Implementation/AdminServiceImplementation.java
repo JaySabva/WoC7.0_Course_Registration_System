@@ -125,7 +125,8 @@ public class AdminServiceImplementation implements AdminService {
             semesterDto.id(),
             semesterDto.semesterName(),
             semesterDto.startDate(),
-            semesterDto.endDate()
+            semesterDto.endDate(),
+            "Active"
         );
 
         try {
