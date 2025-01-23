@@ -1,5 +1,7 @@
 package org.jaysabva.woc_crs.controller;
 
+import org.jaysabva.woc_crs.dto.RequestDto;
+import org.jaysabva.woc_crs.entity.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,5 +48,22 @@ public class StudentController {
         } catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap());
         }
+    }
+
+    @PostMapping("/submit-course-form")
+    public ResponseEntity<String> requestCourse(@RequestBody RequestDto requestDto){
+        try{
+            String resultMessage = studentService.requestCourse(requestDto);
+            return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
+        } catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/get-all-requests")
+    public ResponseEntity<List<Request>> getAllRequest() {
+        return ResponseEntity.status(HttpStatus.OK).body(studentService.getAllRequests());
     }
 }

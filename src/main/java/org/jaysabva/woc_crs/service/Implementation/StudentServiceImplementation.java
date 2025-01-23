@@ -1,4 +1,10 @@
 package org.jaysabva.woc_crs.service.Implementation;
+import jakarta.persistence.EntityNotFoundException;
+import org.jaysabva.woc_crs.dto.RequestDto;
+import org.jaysabva.woc_crs.entity.Course;
+import org.jaysabva.woc_crs.entity.Request;
+import org.jaysabva.woc_crs.repository.CourseRepository;
+import org.jaysabva.woc_crs.repository.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,6 +20,7 @@ import org.jaysabva.woc_crs.dto.ProfessorDto;
 import org.jaysabva.woc_crs.repository.ProfessorRepository;
 import org.jaysabva.woc_crs.service.StudentService;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -21,6 +28,11 @@ public class StudentServiceImplementation implements StudentService{
 
     @Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+    private CourseRepository courseRepository;
+    @Autowired
+    private RequestRepository requestRepository;
 
     public StudentServiceImplementation(StudentRepository studentRepository){
         this.studentRepository = studentRepository;
@@ -63,4 +75,53 @@ public class StudentServiceImplementation implements StudentService{
         }};
     }
 
+    @Override
+    public String requestCourse(RequestDto requestDto){
+        Student student = studentRepository.findById(requestDto.studentId()).orElseThrow(() -> new EntityNotFoundException("Student with this id does not exist"));
+
+        int semesterXor = 0;
+        for (Integer courseId : requestDto.courseIds()) {
+            Course course = courseRepository.findById(Long.valueOf(courseId)).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
+
+            semesterXor ^= course.getSemester().getId();
+            if (semesterXor != course.getSemester().getId() && semesterXor != 0) {
+                throw new IllegalArgumentException("Courses belong to different semesters");
+            }
+        }
+
+        Request request = new Request(
+                requestDto.id(),
+                student,
+                requestDto.courseIds(),
+                requestDto.requestDate(),
+                requestDto.status()
+        );
+
+        try {
+            if (requestRepository.findByStudent(student) != null) {
+
+                Request existingRequest = requestRepository.findByStudent(student);
+                existingRequest.setCourseIds(requestDto.courseIds());
+                existingRequest.setRequestDate(LocalDate.parse(requestDto.requestDate()));
+                existingRequest.setStatus(requestDto.status());
+
+                requestRepository.save(existingRequest);
+
+                return "Course request updated successfully";
+            }
+
+            requestRepository.save(request);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Failed to request course due to database constraints");
+        }
+
+        return "Course requested successfully";
+    }
+
+    @Override
+    public List<Request> getAllRequests() {
+        List<Request> requests = requestRepository.findAll();
+
+        return requests;
+    }
 }
