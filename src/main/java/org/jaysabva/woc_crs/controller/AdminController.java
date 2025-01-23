@@ -2,6 +2,7 @@ package org.jaysabva.woc_crs.controller;
 
 import org.jaysabva.woc_crs.dto.CourseDto;
 import org.jaysabva.woc_crs.entity.Course;
+import org.jaysabva.woc_crs.util.EmailSenderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +26,15 @@ public class AdminController {
         this.adminService = adminService;
     }
 
+    @Autowired
+    private EmailSenderService emailSenderService;
+
     @PostMapping("/add-student")
     public ResponseEntity<String> addStudent(@RequestBody StudentDto studentDto) {
         try {
             String resultMessage = adminService.addStudent(studentDto);
+
+            emailSenderService.sendEmail(studentDto.email(), "Welcome to Course Registration System", emailSenderService.registrationEmail(studentDto.name(), studentDto.email(), studentDto.password(), "Student", "github.com/JaySabva"));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
         } catch (IllegalArgumentException e) {
@@ -42,6 +48,8 @@ public class AdminController {
     public ResponseEntity<String> addProfessor(@RequestBody ProfessorDto professorDto) {
         try {
             String resultMessage = adminService.addProfessor(professorDto);
+
+            emailSenderService.sendEmail(professorDto.email(), "Welcome to Course Registration System", emailSenderService.registrationEmail(professorDto.name(), professorDto.email(), professorDto.password(), "Professor", "github.com/JaySabva"));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
         } catch (IllegalArgumentException e) {
