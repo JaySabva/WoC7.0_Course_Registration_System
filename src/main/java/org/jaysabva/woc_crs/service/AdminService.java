@@ -1,9 +1,6 @@
 package org.jaysabva.woc_crs.service;
 
-import org.jaysabva.woc_crs.dto.CourseDto;
-import org.jaysabva.woc_crs.dto.StudentDto;
-import org.jaysabva.woc_crs.dto.ProfessorDto;
-import org.jaysabva.woc_crs.dto.SemesterDto;
+import org.jaysabva.woc_crs.dto.*;
 import org.jaysabva.woc_crs.entity.Course;
 
 import java.util.*;
@@ -33,4 +30,6 @@ public interface AdminService {
     String deleteCourse(Long id);
 
     List<Course> getAllCourses();
+
+    void sendEmailNotification();
 }

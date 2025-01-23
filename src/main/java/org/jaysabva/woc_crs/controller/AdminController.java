@@ -184,4 +184,15 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ArrayList<>());
         }
     }
+
+    @GetMapping("/send-email-notification")
+    public ResponseEntity<String> sendEmailNotification() {
+        try {
+            adminService.sendEmailNotification();
+
+            return ResponseEntity.status(HttpStatus.OK).body("Email notification sent successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
 }

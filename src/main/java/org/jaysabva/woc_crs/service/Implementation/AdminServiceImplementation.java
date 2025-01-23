@@ -1,10 +1,11 @@
 package org.jaysabva.woc_crs.service.Implementation;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.jaysabva.woc_crs.dto.CourseDto;
+import org.jaysabva.woc_crs.dto.*;
 import org.jaysabva.woc_crs.entity.Course;
 import org.jaysabva.woc_crs.repository.CourseRepository;
 import org.jaysabva.woc_crs.repository.SemesterRepository;
+import org.jaysabva.woc_crs.util.EmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,11 +15,8 @@ import org.jaysabva.woc_crs.service.AdminService;
 
 import org.jaysabva.woc_crs.entity.Student;
 import org.jaysabva.woc_crs.entity.Professor;
-import org.jaysabva.woc_crs.dto.StudentDto;
 import org.jaysabva.woc_crs.repository.StudentRepository;
-import org.jaysabva.woc_crs.dto.ProfessorDto;
 import org.jaysabva.woc_crs.repository.ProfessorRepository;
-import org.jaysabva.woc_crs.dto.SemesterDto;
 import org.jaysabva.woc_crs.entity.Semester;
 
 import java.util.*;
@@ -32,6 +30,9 @@ public class AdminServiceImplementation implements AdminService {
     private SemesterRepository semesterRepository;
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private EmailSenderService emailSenderService;
 
     public AdminServiceImplementation(StudentRepository studentRepository, ProfessorRepository professorRepository, SemesterRepository semesterRepository) {
         this.studentRepository = studentRepository;
@@ -126,6 +127,7 @@ public class AdminServiceImplementation implements AdminService {
             semesterDto.semesterName(),
             semesterDto.startDate(),
             semesterDto.endDate(),
+            semesterDto.registrationEndDate(),
             "Active"
         );
 
@@ -149,6 +151,7 @@ public class AdminServiceImplementation implements AdminService {
         semester.setSemesterName(semesterDto.semesterName());
         semester.setStartDate(semesterDto.startDate());
         semester.setEndDate(semesterDto.endDate());
+        semester.setRegistrationEndDate(semesterDto.registrationEndDate());
 
         try {
             semesterRepository.save(semester);
@@ -181,7 +184,8 @@ public class AdminServiceImplementation implements AdminService {
                 semester.getId(),
                 semester.getSemesterName(),
                 semester.getStartDate().toString(),
-                semester.getEndDate().toString()
+                semester.getEndDate().toString(),
+                semester.getRegistrationEndDate().toString()
             );
             semesterDtos.add(semesterDto);
         }
@@ -256,5 +260,18 @@ public class AdminServiceImplementation implements AdminService {
         List<Course> courses = courseRepository.findAll();
 
         return courses;
+    }
+
+    @Override
+    public void sendEmailNotification() {
+        Semester semester = semesterRepository.findByRegistrationStatus("Active");
+        List<Student> students = studentRepository.findAll();
+
+        semester.setStartDate(semester.getStartDate().minusDays(10).toString());
+
+        for (Student student : students) {
+            emailSenderService.sendEmail(student.getEmail(), "Registration for " + semester.getSemesterName() + " semester is now open", emailSenderService.semesterRegistrationEmail(student.getName(), semester.getSemesterName(), semester.getStartDate().toString(), semester.getRegistrationEndDate().toString()));
+        }
+
     }
 }
