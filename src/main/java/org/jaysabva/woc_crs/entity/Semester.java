@@ -24,17 +24,20 @@ public class Semester {
 
     private LocalDate endDate;
 
+    private LocalDate registrationEndDate;
+
     private String registrationStatus;
 
     public Semester() {
 
     }
 
-    public Semester(Long id, String semesterName, String startDate, String endDate, String registrationStatus) {
+    public Semester(Long id, String semesterName, String startDate, String endDate, String registrationEndDate, String registrationStatus) {
         this.id = id;
         this.semesterName = semesterName;
         this.startDate = LocalDate.parse(startDate);
         this.endDate = LocalDate.parse(endDate);
+        this.registrationEndDate = LocalDate.parse(registrationEndDate);
         this.registrationStatus = registrationStatus;
     }
 
@@ -68,6 +71,14 @@ public class Semester {
 
     public void setEndDate(String endDate) {
         this.endDate = LocalDate.parse(endDate);
+    }
+
+    public LocalDate getRegistrationEndDate() {
+        return registrationEndDate;
+    }
+
+    public void setRegistrationEndDate(String registrationEndDate) {
+        this.registrationEndDate = LocalDate.parse(registrationEndDate);
     }
 
     public String getRegistrationStatus() {
