@@ -2,23 +2,18 @@ package org.jaysabva.woc_crs.service.Implementation;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.jaysabva.woc_crs.dto.*;
-import org.jaysabva.woc_crs.entity.Course;
-import org.jaysabva.woc_crs.repository.CourseRepository;
-import org.jaysabva.woc_crs.repository.SemesterRepository;
+import org.jaysabva.woc_crs.entity.*;
+import org.jaysabva.woc_crs.repository.*;
 import org.jaysabva.woc_crs.util.EmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.jaysabva.woc_crs.service.AdminService;
 
-import org.jaysabva.woc_crs.entity.Student;
-import org.jaysabva.woc_crs.entity.Professor;
-import org.jaysabva.woc_crs.repository.StudentRepository;
-import org.jaysabva.woc_crs.repository.ProfessorRepository;
-import org.jaysabva.woc_crs.entity.Semester;
-
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -33,6 +28,10 @@ public class AdminServiceImplementation implements AdminService {
 
     @Autowired
     private EmailSenderService emailSenderService;
+    @Autowired
+    private RequestRepository requestRepository;
+    @Autowired
+    private RegistrationRepository registrationRepository;
 
     public AdminServiceImplementation(StudentRepository studentRepository, ProfessorRepository professorRepository, SemesterRepository semesterRepository) {
         this.studentRepository = studentRepository;
@@ -273,5 +272,66 @@ public class AdminServiceImplementation implements AdminService {
             emailSenderService.sendEmail(student.getEmail(), "Registration for " + semester.getSemesterName() + " semester is now open", emailSenderService.semesterRegistrationEmail(student.getName(), semester.getSemesterName(), semester.getStartDate().toString(), semester.getRegistrationEndDate().toString()));
         }
 
+    }
+
+    @Override
+    public void assignCourse() {
+        try {
+            Semester latestSemester = semesterRepository.findTopByOrderByStartDateDesc();
+
+            if (latestSemester == null) {
+                throw new RuntimeException("No Semester found");
+            }
+
+            List<Request> requests = requestRepository.findAllByOrderByRequestDateAsc();
+            List<Course> allCourses = courseRepository.findAll();
+
+            Map<Long, Course> courseMap = new HashMap<>();
+
+            for (Course course : allCourses) {
+                courseMap.put(course.getId(), course);
+            }
+
+            for (Request request : requests) {
+                int maxCoursesCanEnroll = 2;
+                for (Integer courseId : request.getCourseIds()) {
+                    if (maxCoursesCanEnroll <= 0)
+                        break;
+
+                    Course course = courseMap.get(Long.valueOf(courseId));
+
+                    if (course != null && course.hasAvailableSeats()) {
+                        try {
+                            System.out.println("Assigning");
+                            Registration registration = new Registration();
+
+                            registration.setStudent(request.getStudent());
+                            registration.setCourse(course);
+                            registration.setSemester(latestSemester);
+                            registration.setRegistrationDate(LocalDate.now());
+
+                            System.out.println("Student " + request.getStudent().getId() + " Course " + courseId);
+                            registrationRepository.save(registration);
+
+                            course.increaseCurrEnrollment();
+                            courseRepository.save(course);
+
+                            maxCoursesCanEnroll--;
+                        } catch (DataAccessException e) {
+                            throw new RuntimeException("Database error while assigning course.", e);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error During Course Assignment Process");
+        }
+    }
+
+    @Override
+    public List<Registration> getAllRegistration() {
+        List<Registration> registrations = registrationRepository.findAll();
+
+        return registrations;
     }
 }

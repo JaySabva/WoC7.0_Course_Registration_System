@@ -2,6 +2,7 @@ package org.jaysabva.woc_crs.service;
 
 import org.jaysabva.woc_crs.dto.*;
 import org.jaysabva.woc_crs.entity.Course;
+import org.jaysabva.woc_crs.entity.Registration;
 
 import java.util.*;
 
@@ -32,4 +33,8 @@ public interface AdminService {
     List<Course> getAllCourses();
 
     void sendEmailNotification();
+
+    void assignCourse();
+
+    List<Registration> getAllRegistration();
 }

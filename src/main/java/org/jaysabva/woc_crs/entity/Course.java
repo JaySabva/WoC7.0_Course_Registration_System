@@ -119,4 +119,12 @@ public class Course {
     public void setSemester(Semester semester) {
         this.semester = semester;
     }
+
+    public boolean hasAvailableSeats() {
+        return max_enrollment - curr_enrollment > 0;
+    }
+
+    public void increaseCurrEnrollment() {
+        curr_enrollment++;
+    }
 }
