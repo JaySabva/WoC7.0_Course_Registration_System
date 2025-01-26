@@ -1,10 +1,13 @@
 package org.jaysabva.woc_crs.util;
 
 
+import org.jaysabva.woc_crs.entity.Course;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class EmailSenderService {
@@ -59,4 +62,27 @@ public class EmailSenderService {
                 "<div class='footer'><p>&copy; 2025 Your University, All Rights Reserved.</p></div></div></body></html>";
     }
 
+    public String courseAssignmentEmail(String studentName, String semester, List<Course> assignedCourses) {
+        StringBuilder coursesTable = new StringBuilder();
+
+        for (Course course : assignedCourses) {
+            coursesTable.append("<tr><td>").append(course.getCourseCode()).append("</td>")
+                    .append("<td>").append(course.getCourseName()).append("</td>")
+                    .append("<td>").append(course.getCredits()).append("</td>")
+                    .append("<td>").append(course.getProfessor().getName()).append("</td></tr>");
+        }
+
+        return "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Your Course Assignments</title>" +
+                "<style>body {font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f9f7;} .container {width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);} .header {text-align: center; margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid #e0e0e0;} .header h1 {color: #4CAF50; font-size: 28px; margin: 0; font-weight: 600;} .content {font-size: 16px; line-height: 1.5; color: #333333;} .content p {margin: 10px 0;} .content .highlight {color: #4CAF50; font-weight: bold;} table {width: 100%; margin-top: 20px; border-collapse: collapse;} table td, table th {padding: 10px; text-align: left; border: 1px solid #ddd;} table th {background-color: #4CAF50; color: white;} .button {display: inline-block; padding: 12px 30px; margin-top: 25px; background-color: #4CAF50; color: white; text-decoration: none; font-size: 16px; font-weight: 500; border-radius: 5px; text-align: center;} .button:hover {background-color: #388E3C;} .footer {text-align: center; font-size: 14px; color: #777777; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;} .footer a {color: #4CAF50; text-decoration: none;}</style></head>" +
+                "<body><div class='container'><div class='header'><h1>Your Course Assignments for " + semester + "</h1></div><div class='content'>" +
+                "<p>Dear " + studentName + ",</p>" +
+                "<p>We are pleased to inform you that the following courses have been assigned to you for the upcoming <strong>" + semester + "</strong>:</p>" +
+                "<table><thead><tr><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Professor</th></tr></thead>" +
+                "<tbody>" + coursesTable.toString() + "</tbody></table>" +
+                "<p>Please make sure to attend all your classes and stay up to date with the course materials.</p>" +
+                "<p>If you have any questions or need further assistance, feel free to reach out to us.</p>" +
+                "<a href='" + "https://yourportal.com/login" + "' class='button'>Go to Your Dashboard</a>" +
+                "</div><div class='footer'><p>If you need assistance, contact us at <a href='mailto:support@yourplatform.com'>support@yourplatform.com</a>.</p>" +
+                "<p>&copy; 2025 Your University, All Rights Reserved.</p></div></div></body></html>";
+    }
 }
