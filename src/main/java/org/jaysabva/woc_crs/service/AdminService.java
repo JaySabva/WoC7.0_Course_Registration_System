@@ -37,4 +37,6 @@ public interface AdminService {
     void assignCourse();
 
     List<Registration> getAllRegistration();
+
+    void sendCourseAssignEmailNotification();
 }

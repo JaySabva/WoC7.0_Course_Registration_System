@@ -293,7 +293,7 @@ public class AdminServiceImplementation implements AdminService {
             }
 
             for (Request request : requests) {
-                int maxCoursesCanEnroll = 2;
+                int maxCoursesCanEnroll = 3;
                 for (Integer courseId : request.getCourseIds()) {
                     if (maxCoursesCanEnroll <= 0)
                         break;
@@ -322,6 +322,8 @@ public class AdminServiceImplementation implements AdminService {
                         }
                     }
                 }
+
+                requestRepository.delete(request);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error During Course Assignment Process");
@@ -333,5 +335,27 @@ public class AdminServiceImplementation implements AdminService {
         List<Registration> registrations = registrationRepository.findAll();
 
         return registrations;
+    }
+
+    @Override
+    public void sendCourseAssignEmailNotification() {
+       Semester latestSemester = semesterRepository.findTopByOrderByStartDateDesc();
+       List<Registration> registrations = registrationRepository.findAllBySemester(latestSemester);
+
+       Map<Student, List<Course>> studentRegistrationMap = new HashMap<>();
+
+       for (Registration registration : registrations) {
+           if (!studentRegistrationMap.containsKey(registration.getStudent())) {
+               studentRegistrationMap.put(registration.getStudent(), new ArrayList<>());
+           }
+
+           studentRegistrationMap.get(registration.getStudent()).add(registration.getCourse());
+       }
+
+         for (Map.Entry<Student, List<Course>> entry : studentRegistrationMap.entrySet()) {
+             emailSenderService.sendEmail(entry.getKey().getEmail(), "Course Registration for " + latestSemester.getSemesterName() + " semester", emailSenderService.courseAssignmentEmail(entry.getKey().getName(), latestSemester.getSemesterName(), entry.getValue()));
+         }
+
+         System.out.println("Email sent successfully");
     }
 }

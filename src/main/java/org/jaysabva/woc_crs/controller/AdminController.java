@@ -212,4 +212,15 @@ public class AdminController {
     public ResponseEntity<List<Registration>> getAllRegistration() {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.getAllRegistration());
     }
+
+    @GetMapping("/send-course-assign-email-notification")
+    public ResponseEntity<String> sendCourseAssignEmailNotification() {
+        try {
+            adminService.sendCourseAssignEmailNotification();
+
+            return ResponseEntity.status(HttpStatus.OK).body("Course Assign Email notification sent successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
+    }
 }
