@@ -38,8 +38,7 @@ public class Request {
 
     }
 
-    public Request(Long id, Student student, List<Integer> courseIds, String requestDate, String status) {
-        this.id = id;
+    public Request(Student student, List<Integer> courseIds, String requestDate, String status) {
         this.student = student;
         this.courseIds = courseIds;
         this.requestDate = LocalDate.parse(requestDate);

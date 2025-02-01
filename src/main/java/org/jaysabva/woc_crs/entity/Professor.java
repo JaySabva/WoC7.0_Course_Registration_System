@@ -26,8 +26,7 @@ public class Professor {
 
     }
 
-    public Professor(Long id, String name, String email, String password) {
-        this.id = id;
+    public Professor(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;

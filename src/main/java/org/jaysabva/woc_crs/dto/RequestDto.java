@@ -1,5 +1,13 @@
 package org.jaysabva.woc_crs.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
-public record RequestDto(Long id, List<Integer> courseIds, String requestDate, String status, Long studentId) {}
+public record RequestDto(
+        @NotNull List<Integer> courseIds,
+        @NotBlank String requestDate,
+        @NotBlank String status,
+        @NotNull Long studentId) {
+}

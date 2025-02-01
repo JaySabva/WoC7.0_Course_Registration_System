@@ -1,6 +1,8 @@
 package org.jaysabva.woc_crs.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 @Setter
@@ -16,19 +18,23 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @NotEmpty
     private String name;
 
+    @NotBlank
+    @NotEmpty
     @Column(unique = true)
     private String email;
 
+    @NotEmpty
     private String password;
 
     public Student() {
 
     }
 
-    public Student(Long id, String name, String email, String password) {
-        this.id = id;
+    public Student(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;

@@ -41,8 +41,7 @@ public class Registration {
     public Registration() {
     }
 
-    public Registration(Long id, Student student, Course course, Semester semester, String registrationDate) {
-        this.id = id;
+    public Registration(Student student, Course course, Semester semester, String registrationDate) {
         this.student = student;
         this.course = course;
         this.semester = semester;

@@ -45,8 +45,7 @@ public class Course {
 
     }
 
-    public Course(Long id, String courseName, String courseCode, Long credits, Long max_enrollment, Long curr_enrollment, Professor professor, Semester semester) {
-        this.id = id;
+    public Course(String courseName, String courseCode, Long credits, Long max_enrollment, Long curr_enrollment, Professor professor, Semester semester) {
         this.courseName = courseName;
         this.courseCode = courseCode;
         this.credits = credits;

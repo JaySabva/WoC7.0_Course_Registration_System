@@ -32,8 +32,7 @@ public class Semester {
 
     }
 
-    public Semester(Long id, String semesterName, String startDate, String endDate, String registrationEndDate, String registrationStatus) {
-        this.id = id;
+    public Semester(String semesterName, String startDate, String endDate, String registrationEndDate, String registrationStatus) {
         this.semesterName = semesterName;
         this.startDate = LocalDate.parse(startDate);
         this.endDate = LocalDate.parse(endDate);
