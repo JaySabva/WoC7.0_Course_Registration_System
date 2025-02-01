@@ -1,9 +1,12 @@
 package org.jaysabva.woc_crs.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.jaysabva.woc_crs.dto.RequestDto;
 import org.jaysabva.woc_crs.entity.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,6 +19,8 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/student")
+@Tag(name = "Student Controller", description = "APIs for Student")
+@Validated
 public class StudentController {
 
     private final StudentService studentService;
@@ -26,7 +31,7 @@ public class StudentController {
     }
 
     @PutMapping("/update-student/{email}")
-    public ResponseEntity<String> updateStudent(@RequestBody StudentDto studentDto, @PathVariable String email){
+    public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDto studentDto, @PathVariable String email){
         try{
             String resultMessage = studentService.updateStudent(studentDto, email);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
@@ -51,7 +56,7 @@ public class StudentController {
     }
 
     @PostMapping("/submit-course-form")
-    public ResponseEntity<String> requestCourse(@RequestBody RequestDto requestDto){
+    public ResponseEntity<String> requestCourse(@RequestBody @Valid RequestDto requestDto){
         try{
             String resultMessage = studentService.requestCourse(requestDto);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);

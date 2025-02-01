@@ -47,7 +47,6 @@ public class AdminServiceImplementation implements AdminService {
         }
 
         Student student = new Student(
-            studentDto.id(),
             studentDto.name(),
             studentDto.email(),
             studentDto.password()
@@ -70,7 +69,6 @@ public class AdminServiceImplementation implements AdminService {
         }
 
         Professor professor = new Professor(
-            professorDto.id(),
             professorDto.name(),
             professorDto.email(),
             professorDto.password()
@@ -122,7 +120,6 @@ public class AdminServiceImplementation implements AdminService {
         }
 
         Semester semester = new Semester(
-            semesterDto.id(),
             semesterDto.semesterName(),
             semesterDto.startDate(),
             semesterDto.endDate(),
@@ -180,7 +177,6 @@ public class AdminServiceImplementation implements AdminService {
 
         for (Semester semester : semesters) {
             SemesterDto semesterDto = new SemesterDto(
-                semester.getId(),
                 semester.getSemesterName(),
                 semester.getStartDate().toString(),
                 semester.getEndDate().toString(),
@@ -198,12 +194,11 @@ public class AdminServiceImplementation implements AdminService {
         Semester semester = semesterRepository.findById(courseDto.semesterId()).orElseThrow(() -> new EntityNotFoundException("Semester with this name does not exist"));
 
         Course course = new Course(
-            courseDto.id(),
             courseDto.courseName(),
             courseDto.courseCode(),
             courseDto.credit(),
             courseDto.max_enrollment(),
-            courseDto.curr_enrollment(),
+            courseDto.curr_enrollment() != null ? courseDto.curr_enrollment() : 0,
             professor,
             semester
         );
@@ -293,7 +288,7 @@ public class AdminServiceImplementation implements AdminService {
             }
 
             for (Request request : requests) {
-                int maxCoursesCanEnroll = 3;
+                int maxCoursesCanEnroll = 2;
                 for (Integer courseId : request.getCourseIds()) {
                     if (maxCoursesCanEnroll <= 0)
                         break;

@@ -1,11 +1,14 @@
 package org.jaysabva.woc_crs.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.jaysabva.woc_crs.dto.CourseDto;
 import org.jaysabva.woc_crs.entity.Course;
 import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.util.EmailSenderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,6 +21,8 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/admin")
+@Tag(name = "Admin Controller", description = "APIs for Admin")
+@Validated
 public class AdminController {
 
     private final AdminService adminService;
@@ -31,7 +36,7 @@ public class AdminController {
     private EmailSenderService emailSenderService;
 
     @PostMapping("/add-student")
-    public ResponseEntity<String> addStudent(@RequestBody StudentDto studentDto) {
+    public ResponseEntity<String> addStudent(@RequestBody @Valid StudentDto studentDto) {
         try {
             String resultMessage = adminService.addStudent(studentDto);
 
@@ -46,7 +51,7 @@ public class AdminController {
     }
 
     @PostMapping("/add-professor")
-    public ResponseEntity<String> addProfessor(@RequestBody ProfessorDto professorDto) {
+    public ResponseEntity<String> addProfessor(@RequestBody @Valid ProfessorDto professorDto) {
         try {
             String resultMessage = adminService.addProfessor(professorDto);
 
@@ -87,7 +92,7 @@ public class AdminController {
     }
 
     @PostMapping("/add-semester")
-    public ResponseEntity<String> addSemester(@RequestBody SemesterDto semesterDto) {
+    public ResponseEntity<String> addSemester(@RequestBody @Valid SemesterDto semesterDto) {
         try {
             String resultMessage = adminService.addSemester(semesterDto);
 
@@ -100,7 +105,7 @@ public class AdminController {
     }
 
     @PutMapping("/update-semester/{id}")
-    public ResponseEntity<String> updateSemester(@RequestBody SemesterDto semesterDto, @PathVariable Long id) {
+    public ResponseEntity<String> updateSemester(@RequestBody @Valid SemesterDto semesterDto, @PathVariable Long id) {
         try {
             String resultMessage = adminService.updateSemester(semesterDto, id);
 
@@ -137,7 +142,7 @@ public class AdminController {
     }
 
     @PostMapping("/add-course")
-    public ResponseEntity<String> addCourse(@RequestBody CourseDto courseDto) {
+    public ResponseEntity<String> addCourse(@RequestBody @Valid CourseDto courseDto) {
         try {
             String resultMessage = adminService.addCourse(courseDto);
 
@@ -150,7 +155,7 @@ public class AdminController {
     }
 
     @PutMapping("/update-course/{id}")
-    public ResponseEntity<String> updateCourse(@RequestBody CourseDto courseDto, @PathVariable Long id) {
+    public ResponseEntity<String> updateCourse(@RequestBody @Valid CourseDto courseDto, @PathVariable Long id) {
         try {
             String resultMessage = adminService.updateCourse(courseDto, id);
 

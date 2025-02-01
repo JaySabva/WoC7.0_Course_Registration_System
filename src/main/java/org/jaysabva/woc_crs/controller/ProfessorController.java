@@ -1,7 +1,11 @@
 package org.jaysabva.woc_crs.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.Table;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,6 +19,8 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/professor")
+@Tag(name = "Professor Controller", description = "APIs for Professor")
+@Validated
 public class ProfessorController {
 
     private final ProfessorService professorService;
@@ -25,7 +31,7 @@ public class ProfessorController {
     }
 
     @PutMapping("/update-professor/{email}")
-    public ResponseEntity<String> updateProfessor(@RequestBody ProfessorDto professorDto, @PathVariable String email){
+    public ResponseEntity<String> updateProfessor(@RequestBody @Valid ProfessorDto professorDto, @PathVariable String email){
         try{
             String resultMessage = professorService.updateProfessor(professorDto, email);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);

@@ -93,7 +93,6 @@ public class StudentServiceImplementation implements StudentService{
         }
 
         Request request = new Request(
-                requestDto.id(),
                 student,
                 requestDto.courseIds(),
                 requestDto.requestDate(),
