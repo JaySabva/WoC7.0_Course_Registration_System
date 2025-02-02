@@ -12,8 +12,12 @@ import java.util.List;
 @Service
 public class EmailSenderService {
 
+    private final JavaMailSender mailSender;
+
     @Autowired
-    private JavaMailSender mailSender;
+    public EmailSenderService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
     public void sendEmail(String toEmail, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -78,7 +82,7 @@ public class EmailSenderService {
                 "<p>Dear " + studentName + ",</p>" +
                 "<p>We are pleased to inform you that the following courses have been assigned to you for the upcoming <strong>" + semester + "</strong>:</p>" +
                 "<table><thead><tr><th>Course Code</th><th>Course Name</th><th>Credits</th><th>Professor</th></tr></thead>" +
-                "<tbody>" + coursesTable.toString() + "</tbody></table>" +
+                "<tbody>" + coursesTable + "</tbody></table>" +
                 "<p>Please make sure to attend all your classes and stay up to date with the course materials.</p>" +
                 "<p>If you have any questions or need further assistance, feel free to reach out to us.</p>" +
                 "<a href='" + "https://yourportal.com/login" + "' class='button'>Go to Your Dashboard</a>" +

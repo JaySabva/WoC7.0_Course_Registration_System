@@ -1,8 +1,12 @@
 package org.jaysabva.woc_crs.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import org.hibernate.ResourceClosedException;
 import org.jaysabva.woc_crs.dto.RequestDto;
+import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.entity.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +14,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.jaysabva.woc_crs.service.AdminService;
 import org.jaysabva.woc_crs.service.StudentService;
 import org.jaysabva.woc_crs.dto.StudentDto;
-import org.jaysabva.woc_crs.dto.ProfessorDto;
 
 import java.util.*;
 
@@ -35,8 +37,10 @@ public class StudentController {
         try{
             String resultMessage = studentService.updateStudent(studentDto, email);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch(IllegalArgumentException e){
+        } catch(EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (EntityExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
         }
@@ -48,10 +52,10 @@ public class StudentController {
             Map<String, String> studentDto= studentService.getStudent(email);
 
             return ResponseEntity.status(HttpStatus.OK).body(studentDto);
-        } catch(IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap());
+        } catch(EntityNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<>());
         } catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<>());
         }
     }
 
@@ -60,8 +64,10 @@ public class StudentController {
         try{
             String resultMessage = studentService.requestCourse(requestDto);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch(IllegalArgumentException e){
+        } catch(EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (ResourceClosedException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
         }
@@ -70,5 +76,10 @@ public class StudentController {
     @GetMapping("/get-all-requests")
     public ResponseEntity<List<Request>> getAllRequest() {
         return ResponseEntity.status(HttpStatus.OK).body(studentService.getAllRequests());
+    }
+
+    @GetMapping("/get-registered-courses/{id}")
+    public ResponseEntity<List<Registration>> getRegisteredCourses(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(studentService.getRegisteredCourses(id));
     }
 }

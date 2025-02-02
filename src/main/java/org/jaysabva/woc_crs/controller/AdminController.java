@@ -1,6 +1,8 @@
 package org.jaysabva.woc_crs.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.jaysabva.woc_crs.dto.CourseDto;
 import org.jaysabva.woc_crs.entity.Course;
@@ -26,14 +28,13 @@ import java.util.*;
 public class AdminController {
 
     private final AdminService adminService;
+    private final EmailSenderService emailSenderService;
 
     @Autowired
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService, EmailSenderService emailSenderService) {
         this.adminService = adminService;
+        this.emailSenderService = emailSenderService;
     }
-
-    @Autowired
-    private EmailSenderService emailSenderService;
 
     @PostMapping("/add-student")
     public ResponseEntity<String> addStudent(@RequestBody @Valid StudentDto studentDto) {
@@ -43,7 +44,7 @@ public class AdminController {
             emailSenderService.sendEmail(studentDto.email(), "Welcome to Course Registration System", emailSenderService.registrationEmail(studentDto.name(), studentDto.email(), studentDto.password(), "Student", "github.com/JaySabva"));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
@@ -58,7 +59,7 @@ public class AdminController {
             emailSenderService.sendEmail(professorDto.email(), "Welcome to Course Registration System", emailSenderService.registrationEmail(professorDto.name(), professorDto.email(), professorDto.password(), "Professor", "github.com/JaySabva"));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
@@ -71,7 +72,7 @@ public class AdminController {
             String resultMessage = adminService.deleteStudent(email);
 
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
@@ -84,7 +85,7 @@ public class AdminController {
             String resultMessage = adminService.deleteProfessor(email);
 
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
@@ -97,7 +98,7 @@ public class AdminController {
             String resultMessage = adminService.addSemester(semesterDto);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
@@ -110,8 +111,10 @@ public class AdminController {
             String resultMessage = adminService.updateSemester(semesterDto, id);
 
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (EntityExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
         }
@@ -123,7 +126,7 @@ public class AdminController {
             String resultMessage = adminService.deleteSemester(id);
 
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
@@ -147,8 +150,10 @@ public class AdminController {
             String resultMessage = adminService.addCourse(courseDto);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
         }
@@ -160,7 +165,7 @@ public class AdminController {
             String resultMessage = adminService.updateCourse(courseDto, id);
 
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
@@ -173,7 +178,7 @@ public class AdminController {
             String resultMessage = adminService.deleteCourse(id);
 
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch (IllegalArgumentException e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());

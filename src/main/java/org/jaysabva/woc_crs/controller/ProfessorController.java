@@ -1,6 +1,7 @@
 package org.jaysabva.woc_crs.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class ProfessorController {
         try{
             String resultMessage = professorService.updateProfessor(professorDto, email);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
-        } catch(IllegalArgumentException e){
+        } catch(EntityNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
@@ -48,10 +49,10 @@ public class ProfessorController {
             Map<String, String> professorDto= professorService.getProfessor(email);
 
             return ResponseEntity.status(HttpStatus.OK).body(professorDto);
-        } catch(IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap());
+        } catch(EntityNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<>());
         } catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<>());
         }
     }
 }
