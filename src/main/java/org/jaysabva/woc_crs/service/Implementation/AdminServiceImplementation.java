@@ -1,49 +1,54 @@
 package org.jaysabva.woc_crs.service.Implementation;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.jaysabva.woc_crs.dto.*;
 import org.jaysabva.woc_crs.entity.*;
 import org.jaysabva.woc_crs.repository.*;
 import org.jaysabva.woc_crs.util.EmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.transaction.annotation.Transactional;
 
 import org.jaysabva.woc_crs.service.AdminService;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class AdminServiceImplementation implements AdminService {
 
-    @Autowired
-    private StudentRepository studentRepository;
-    private ProfessorRepository professorRepository;
-    private SemesterRepository semesterRepository;
-    @Autowired
-    private CourseRepository courseRepository;
+    private final StudentRepository studentRepository;
+    private final ProfessorRepository professorRepository;
+    private final SemesterRepository semesterRepository;
+    private final CourseRepository courseRepository;
+    private final EmailSenderService emailSenderService;
+    private final RequestRepository requestRepository;
+    private final RegistrationRepository registrationRepository;
 
     @Autowired
-    private EmailSenderService emailSenderService;
-    @Autowired
-    private RequestRepository requestRepository;
-    @Autowired
-    private RegistrationRepository registrationRepository;
-
-    public AdminServiceImplementation(StudentRepository studentRepository, ProfessorRepository professorRepository, SemesterRepository semesterRepository) {
+    public AdminServiceImplementation(
+            StudentRepository studentRepository,
+            ProfessorRepository professorRepository,
+            SemesterRepository semesterRepository,
+            CourseRepository courseRepository,
+            EmailSenderService emailSenderService,
+            RequestRepository requestRepository,
+            RegistrationRepository registrationRepository) {
         this.studentRepository = studentRepository;
         this.professorRepository = professorRepository;
         this.semesterRepository = semesterRepository;
+        this.courseRepository = courseRepository;
+        this.emailSenderService = emailSenderService;
+        this.requestRepository = requestRepository;
+        this.registrationRepository = registrationRepository;
     }
 
     @Override
     public String addStudent(StudentDto studentDto) {
 
         if(studentRepository.findByEmail(studentDto.email()) != null) {
-            throw new IllegalArgumentException("Student with this email already exists");
+            throw new EntityExistsException("Student with this email already exists");
         }
 
         Student student = new Student(
@@ -65,7 +70,7 @@ public class AdminServiceImplementation implements AdminService {
     public String addProfessor(ProfessorDto professorDto) {
 
         if(professorRepository.findByEmail(professorDto.email()) != null) {
-            throw new IllegalArgumentException("Professor with this email already exists");
+            throw new EntityExistsException("Professor with this email already exists");
         }
 
         Professor professor = new Professor(
@@ -84,31 +89,37 @@ public class AdminServiceImplementation implements AdminService {
     }
 
     @Override
-    @Transactional
     public String deleteStudent(String email) {
 
         Student student = studentRepository.findByEmail(email);
 
         if(student == null) {
-            throw new IllegalArgumentException("Student with this email does not exist");
+            throw new EntityNotFoundException("Student with this email does not exist");
         }
 
-        studentRepository.deleteByEmail(email);
+        try {
+            studentRepository.delete(student);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to delete student", e);
+        }
 
         return "Student deleted successfully";
     }
 
     @Override
-    @Transactional
     public String deleteProfessor(String email) {
 
         Professor professor = professorRepository.findByEmail(email);
 
         if(professor == null) {
-            throw new IllegalArgumentException("Professor with this email does not exist");
+            throw new EntityNotFoundException("Professor with this email does not exist");
         }
 
-        professorRepository.deleteByEmail(email);
+        try {
+            professorRepository.delete(professor);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to delete professor", e);
+        }
 
         return "Professor deleted successfully";
     }
@@ -116,7 +127,7 @@ public class AdminServiceImplementation implements AdminService {
     @Override
     public String addSemester(SemesterDto semesterDto) {
         if (semesterRepository.findBySemesterName(semesterDto.semesterName()) != null) {
-            throw new IllegalArgumentException("Semester with this name already exists");
+            throw new EntityExistsException("Semester with this name already exists");
         }
 
         Semester semester = new Semester(
@@ -124,12 +135,12 @@ public class AdminServiceImplementation implements AdminService {
             semesterDto.startDate(),
             semesterDto.endDate(),
             semesterDto.registrationEndDate(),
-            "Active"
+            semesterDto.registrationStatus()
         );
 
         try {
             semesterRepository.save(semester);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Failed to add semester due to database constraints");
         }
 
@@ -141,17 +152,18 @@ public class AdminServiceImplementation implements AdminService {
         Semester semester = semesterRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Semester with this id does not exist"));
 
         if (semesterRepository.findBySemesterName(semesterDto.semesterName()) != null) {
-            throw new IllegalArgumentException("Semester with this name already exists");
+            throw new EntityExistsException("Semester with this name already exists");
         }
 
-        semester.setSemesterName(semesterDto.semesterName());
-        semester.setStartDate(semesterDto.startDate());
-        semester.setEndDate(semesterDto.endDate());
-        semester.setRegistrationEndDate(semesterDto.registrationEndDate());
+        semester.setSemesterName(semesterDto.semesterName() != null ? semesterDto.semesterName() : semester.getSemesterName());
+        semester.setStartDate(semesterDto.startDate() != null ? semesterDto.startDate() : semester.getStartDate().toString());
+        semester.setEndDate(semesterDto.endDate() != null ? semesterDto.endDate() : semester.getEndDate().toString());
+        semester.setRegistrationEndDate(semesterDto.registrationEndDate() != null ? semesterDto.registrationEndDate() : semester.getRegistrationEndDate().toString());
+        semester.setRegistrationStatus(semesterDto.registrationStatus() != null ? semesterDto.registrationStatus() : semester.getRegistrationStatus());
 
         try {
             semesterRepository.save(semester);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Failed to update semester due to database constraints");
         }
 
@@ -164,12 +176,13 @@ public class AdminServiceImplementation implements AdminService {
 
         try {
             semesterRepository.delete(semester);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Failed to delete semester due to database constraints");
         }
 
         return "Semester deleted successfully";
     }
+
     @Override
     public List<SemesterDto> getAllSemesters() {
         List<Semester> semesters = semesterRepository.findAll();
@@ -180,7 +193,8 @@ public class AdminServiceImplementation implements AdminService {
                 semester.getSemesterName(),
                 semester.getStartDate().toString(),
                 semester.getEndDate().toString(),
-                semester.getRegistrationEndDate().toString()
+                semester.getRegistrationEndDate().toString(),
+                semester.getRegistrationStatus()
             );
             semesterDtos.add(semesterDto);
         }
@@ -197,7 +211,7 @@ public class AdminServiceImplementation implements AdminService {
             courseDto.courseName(),
             courseDto.courseCode(),
             courseDto.credit(),
-            courseDto.max_enrollment(),
+            courseDto.max_enrollment() != null ? courseDto.max_enrollment() : Integer.MAX_VALUE,
             courseDto.curr_enrollment() != null ? courseDto.curr_enrollment() : 0,
             professor,
             semester
@@ -205,7 +219,7 @@ public class AdminServiceImplementation implements AdminService {
 
         try {
             courseRepository.save(course);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Failed to add course due to database constraints");
         }
 
@@ -216,20 +230,20 @@ public class AdminServiceImplementation implements AdminService {
     public String updateCourse(CourseDto courseDto, Long id) {
         Course course = courseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
 
-        Professor professor = professorRepository.findById(courseDto.professorId()).orElseThrow(() -> new EntityNotFoundException("Professor with this id does not exist"));
-        Semester semester = semesterRepository.findById(courseDto.semesterId()).orElseThrow(() -> new EntityNotFoundException("Semester with this name does not exist"));
+        Professor professor = professorRepository.findById(courseDto.professorId() != null ? courseDto.professorId() : course.getProfessor().getId()).orElseThrow(() -> new EntityNotFoundException("Professor with this id does not exist"));
+        Semester semester = semesterRepository.findById(courseDto.semesterId() != null ? courseDto.semesterId() : course.getSemester().getId()).orElseThrow(() -> new EntityNotFoundException("Semester with this name does not exist"));
 
-        course.setCourseName(courseDto.courseName());
-        course.setCourseCode(courseDto.courseCode());
-        course.setCredits(courseDto.credit());
-        course.setMax_enrollment(courseDto.max_enrollment());
-        course.setCurr_enrollment(courseDto.curr_enrollment());
-        course.setProfessor(professor);
-        course.setSemester(semester);
+        course.setCourseName(courseDto.courseName() != null ? courseDto.courseName() : course.getCourseName());
+        course.setCourseCode(courseDto.courseCode() != null ? courseDto.courseCode() : course.getCourseCode());
+        course.setCredits(courseDto.credit() != null ? courseDto.credit() : course.getCredits());
+        course.setMax_enrollment(courseDto.max_enrollment() != null ? courseDto.max_enrollment() : course.getMax_enrollment());
+        course.setCurr_enrollment(courseDto.curr_enrollment() != null ? courseDto.curr_enrollment() : course.getCurr_enrollment());
+        course.setProfessor(professor != null ? professor : course.getProfessor());
+        course.setSemester(semester != null ? semester : course.getSemester());
 
         try {
             courseRepository.save(course);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Failed to update course due to database constraints");
         }
 
@@ -242,7 +256,7 @@ public class AdminServiceImplementation implements AdminService {
 
         try {
             courseRepository.delete(course);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Failed to delete course due to database constraints");
         }
 
@@ -258,15 +272,14 @@ public class AdminServiceImplementation implements AdminService {
 
     @Override
     public void sendEmailNotification() {
-        Semester semester = semesterRepository.findByRegistrationStatus("Active");
+        Semester semester = semesterRepository.findByRegistrationStatusOrderByEndDateDesc("Active");
         List<Student> students = studentRepository.findAll();
 
-        semester.setStartDate(semester.getStartDate().minusDays(10).toString());
+        semester.setStartDate(semester.getRegistrationEndDate().minusDays(10).toString());
 
         for (Student student : students) {
             emailSenderService.sendEmail(student.getEmail(), "Registration for " + semester.getSemesterName() + " semester is now open", emailSenderService.semesterRegistrationEmail(student.getName(), semester.getSemesterName(), semester.getStartDate().toString(), semester.getRegistrationEndDate().toString()));
         }
-
     }
 
     @Override
@@ -303,7 +316,7 @@ public class AdminServiceImplementation implements AdminService {
                             registration.setStudent(request.getStudent());
                             registration.setCourse(course);
                             registration.setSemester(latestSemester);
-                            registration.setRegistrationDate(LocalDate.now());
+                            registration.setRegistrationDate(LocalDateTime.now().toString());
 
                             System.out.println("Student " + request.getStudent().getId() + " Course " + courseId);
                             registrationRepository.save(registration);
@@ -312,7 +325,7 @@ public class AdminServiceImplementation implements AdminService {
                             courseRepository.save(course);
 
                             maxCoursesCanEnroll--;
-                        } catch (DataAccessException e) {
+                        } catch (Exception e) {
                             throw new RuntimeException("Database error while assigning course.", e);
                         }
                     }
