@@ -1,6 +1,7 @@
 package org.jaysabva.woc_crs.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.time.LocalDate;
 
@@ -17,13 +18,17 @@ public class Semester {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(unique = true)
     private String semesterName;
 
+    @NotBlank
     private LocalDate startDate;
 
+    @NotBlank
     private LocalDate endDate;
 
+    @NotBlank
     private LocalDate registrationEndDate;
 
     private String registrationStatus;

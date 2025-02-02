@@ -19,15 +19,13 @@ public class Student {
     private Long id;
 
     @NotBlank
-    @NotEmpty
     private String name;
 
     @NotBlank
-    @NotEmpty
     @Column(unique = true)
     private String email;
 
-    @NotEmpty
+    @NotBlank
     private String password;
 
     public Student() {

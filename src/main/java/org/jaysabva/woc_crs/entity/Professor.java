@@ -1,6 +1,7 @@
 package org.jaysabva.woc_crs.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Setter
@@ -16,10 +17,14 @@ public class Professor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     private String name;
 
+    @NotBlank
+    @Column(unique = true)
     private String email;
 
+    @NotBlank
     private String password;
 
     public Professor() {
