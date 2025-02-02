@@ -4,7 +4,6 @@ package org.jaysabva.woc_crs.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,13 +29,10 @@ public class Course {
     @NotBlank
     private String courseCode;
 
-    @NotBlank
     private Long credits;
 
-    @NotBlank
     private Long max_enrollment;
 
-    @NotBlank
     private Long curr_enrollment;
 
     @ManyToOne

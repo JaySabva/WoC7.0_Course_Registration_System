@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Setter
@@ -34,7 +34,7 @@ public class Registration {
     @JoinColumn(name = "semester_id", referencedColumnName = "id")
     private Semester semester;
 
-    private LocalDate registrationDate;
+    private LocalDateTime registrationDate;
 
     private Long grade;
 
@@ -45,7 +45,7 @@ public class Registration {
         this.student = student;
         this.course = course;
         this.semester = semester;
-        this.registrationDate = LocalDate.parse(registrationDate);
+        this.registrationDate = LocalDateTime.parse(registrationDate);
         this.grade = -1L;
     }
 
@@ -81,12 +81,12 @@ public class Registration {
         this.semester = semester;
     }
 
-    public LocalDate getRegistrationDate() {
+    public LocalDateTime getRegistrationDate() {
         return registrationDate;
     }
 
-    public void setRegistrationDate(LocalDate registrationDate) {
-        this.registrationDate = registrationDate;
+    public void setRegistrationDate(String registrationDate) {
+        this.registrationDate = LocalDateTime.parse(registrationDate);
     }
 
     public Long getGrade() {

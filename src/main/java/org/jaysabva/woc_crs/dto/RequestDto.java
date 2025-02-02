@@ -8,6 +8,5 @@ import java.util.List;
 public record RequestDto(
         @NotNull List<Integer> courseIds,
         @NotBlank String requestDate,
-        @NotBlank String status,
         @NotNull Long studentId) {
 }

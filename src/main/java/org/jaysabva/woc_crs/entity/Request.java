@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -30,19 +30,16 @@ public class Request {
     @ElementCollection
     private List<Integer> courseIds;
 
-    private LocalDate requestDate;
-
-    private String status;
+    private LocalDateTime requestDate;
 
     public Request() {
 
     }
 
-    public Request(Student student, List<Integer> courseIds, String requestDate, String status) {
+    public Request(Student student, List<Integer> courseIds, String requestDate) {
         this.student = student;
         this.courseIds = courseIds;
-        this.requestDate = LocalDate.parse(requestDate);
-        this.status = status;
+        this.requestDate = LocalDateTime.parse(requestDate);
     }
 
     public Long getId() {
@@ -69,19 +66,11 @@ public class Request {
         this.courseIds = courseIds;
     }
 
-    public LocalDate getRequestDate() {
+    public LocalDateTime getRequestDate() {
         return requestDate;
     }
 
-    public void setRequestDate(LocalDate requestDate) {
-        this.requestDate = requestDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    public void setRequestDate(String requestDate) {
+        this.requestDate = LocalDateTime.parse(requestDate);
     }
 }

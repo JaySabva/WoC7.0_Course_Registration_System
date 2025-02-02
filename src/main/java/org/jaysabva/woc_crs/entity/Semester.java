@@ -3,7 +3,7 @@ package org.jaysabva.woc_crs.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -22,14 +22,11 @@ public class Semester {
     @Column(unique = true)
     private String semesterName;
 
-    @NotBlank
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
-    @NotBlank
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
-    @NotBlank
-    private LocalDate registrationEndDate;
+    private LocalDateTime registrationEndDate;
 
     private String registrationStatus;
 
@@ -39,9 +36,9 @@ public class Semester {
 
     public Semester(String semesterName, String startDate, String endDate, String registrationEndDate, String registrationStatus) {
         this.semesterName = semesterName;
-        this.startDate = LocalDate.parse(startDate);
-        this.endDate = LocalDate.parse(endDate);
-        this.registrationEndDate = LocalDate.parse(registrationEndDate);
+        this.startDate = LocalDateTime.parse(startDate);
+        this.endDate = LocalDateTime.parse(endDate);
+        this.registrationEndDate = LocalDateTime.parse(registrationEndDate);
         this.registrationStatus = registrationStatus;
     }
 
@@ -61,28 +58,28 @@ public class Semester {
         this.semesterName = semesterName;
     }
 
-    public LocalDate getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
     public void setStartDate(String startDate) {
-        this.startDate = LocalDate.parse(startDate);
+        this.startDate = LocalDateTime.parse(startDate);
     }
 
-    public LocalDate getEndDate() {
+    public LocalDateTime getEndDate() {
         return endDate;
     }
 
     public void setEndDate(String endDate) {
-        this.endDate = LocalDate.parse(endDate);
+        this.endDate = LocalDateTime.parse(endDate);
     }
 
-    public LocalDate getRegistrationEndDate() {
+    public LocalDateTime getRegistrationEndDate() {
         return registrationEndDate;
     }
 
     public void setRegistrationEndDate(String registrationEndDate) {
-        this.registrationEndDate = LocalDate.parse(registrationEndDate);
+        this.registrationEndDate = LocalDateTime.parse(registrationEndDate);
     }
 
     public String getRegistrationStatus() {
