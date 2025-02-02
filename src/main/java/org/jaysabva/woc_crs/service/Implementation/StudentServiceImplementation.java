@@ -1,38 +1,39 @@
 package org.jaysabva.woc_crs.service.Implementation;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.SynchronizationType;
+import org.hibernate.ResourceClosedException;
 import org.jaysabva.woc_crs.dto.RequestDto;
 import org.jaysabva.woc_crs.entity.*;
 import org.jaysabva.woc_crs.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.transaction.annotation.Transactional;
-
-import org.jaysabva.woc_crs.service.AdminService;
 
 import org.jaysabva.woc_crs.dto.StudentDto;
-import org.jaysabva.woc_crs.dto.ProfessorDto;
 import org.jaysabva.woc_crs.service.StudentService;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class StudentServiceImplementation implements StudentService{
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
+    private final CourseRepository courseRepository;
+    private final RequestRepository requestRepository;
+    private final SemesterRepository semesterRepository;
+    private final RegistrationRepository registrationRepository;
 
     @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
-    private RequestRepository requestRepository;
-    @Autowired
-    private SemesterRepository semesterRepository;
-
-    public StudentServiceImplementation(StudentRepository studentRepository){
+    public StudentServiceImplementation(
+            StudentRepository studentRepository,
+            CourseRepository courseRepository,
+            RequestRepository requestRepository,
+            SemesterRepository semesterRepository, RegistrationRepository registrationRepository) {
         this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository;
+        this.requestRepository = requestRepository;
+        this.semesterRepository = semesterRepository;
+        this.registrationRepository = registrationRepository;
     }
 
     @Override
@@ -40,11 +41,11 @@ public class StudentServiceImplementation implements StudentService{
 
         Student student = studentRepository.findByEmail(email);
         if(student == null){
-            throw new IllegalArgumentException("Student with this email does not exist");
+            throw new EntityNotFoundException("Student with this email does not exist");
         }
 
         if(studentRepository.findByEmail(studentDto.email()) != null) {
-            throw new IllegalArgumentException("Student with this email already exists");
+            throw new EntityExistsException("Student with this email already exists");
         }
 
         student.setName(studentDto.name());
@@ -53,7 +54,7 @@ public class StudentServiceImplementation implements StudentService{
 
         try {
             studentRepository.save(student);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Failed to update student due to database constraints");
         }
 
@@ -64,9 +65,9 @@ public class StudentServiceImplementation implements StudentService{
     public Map<String, String> getStudent(String email){
         Student student = studentRepository.findByEmail(email);
         if(student == null){
-            throw new IllegalArgumentException("Student with this email does not exist");
+            throw new EntityNotFoundException("Student with this email does not exist");
         }
-        return new HashMap<String, String>(){{
+        return new HashMap<>(){{
             put("name", student.getName());
             put("email", student.getEmail());
         }};
@@ -75,11 +76,18 @@ public class StudentServiceImplementation implements StudentService{
     @Override
     public String requestCourse(RequestDto requestDto){
         Student student = studentRepository.findById(requestDto.studentId()).orElseThrow(() -> new EntityNotFoundException("Student with this id does not exist"));
-        Course course = courseRepository.findById(requestDto.courseIds().get(0).longValue()).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
+        Course course = courseRepository.findById(requestDto.courseIds().getFirst().longValue()).orElseThrow(() -> new EntityNotFoundException("Course with this id does not exist"));
         Semester semester = semesterRepository.findById(course.getSemester().getId()).orElseThrow(() -> new EntityNotFoundException("Semester with this id does not exist"));
 
-        if (semester.getRegistrationStatus().equals("Closed")) {
-            throw new IllegalArgumentException("Registration is closed for this semester");
+        if (!semester.getRegistrationStatus().equals("Active")) {
+            throw new ResourceClosedException("Registration is closed for this semester");
+        }
+
+        if (!semester.getRegistrationEndDate().isAfter(LocalDateTime.now())) {
+            semester.setRegistrationStatus("Closed");
+            semesterRepository.save(semester);
+
+            throw new ResourceClosedException("Registration is closed for this semester");
         }
 
         int semesterXor = 0;
@@ -95,8 +103,7 @@ public class StudentServiceImplementation implements StudentService{
         Request request = new Request(
                 student,
                 requestDto.courseIds(),
-                requestDto.requestDate(),
-                requestDto.status()
+                LocalDateTime.now().toString()
         );
 
         try {
@@ -104,8 +111,7 @@ public class StudentServiceImplementation implements StudentService{
 
                 Request existingRequest = requestRepository.findByStudent(student);
                 existingRequest.setCourseIds(requestDto.courseIds());
-                existingRequest.setRequestDate(LocalDate.parse(requestDto.requestDate()));
-                existingRequest.setStatus(requestDto.status());
+                existingRequest.setRequestDate(LocalDateTime.now().toString());
 
                 requestRepository.save(existingRequest);
 
@@ -113,7 +119,7 @@ public class StudentServiceImplementation implements StudentService{
             }
 
             requestRepository.save(request);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException("Failed to request course due to database constraints");
         }
 
@@ -125,5 +131,12 @@ public class StudentServiceImplementation implements StudentService{
         List<Request> requests = requestRepository.findAll();
 
         return requests;
+    }
+
+    @Override
+    public List<Registration> getRegisteredCourses(Long id) {
+        List<Registration> registrations = registrationRepository.findByStudent_Id(id);
+
+        return registrations;
     }
 }
