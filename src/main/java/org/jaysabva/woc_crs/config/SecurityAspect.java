@@ -15,6 +15,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Aspect
 @Component
@@ -40,6 +42,13 @@ public class SecurityAspect {
         // Extract user details (e.g., role) from the token
         Claims claims = jwtProvider.validateToken(token);
         String role = claims.get("role", String.class);
+
+        Map<String, String> idAndEmail = new HashMap<>();
+        idAndEmail.put("id", claims.get("id", String.class));
+        idAndEmail.put("email", claims.get("sub", String.class));
+
+        JwtContext.setJwtClaims(idAndEmail);
+
 
         // Retrieve the required roles from the class annotation
         RoleRequired roleRequired = joinPoint.getTarget().getClass().getAnnotation(RoleRequired.class);
