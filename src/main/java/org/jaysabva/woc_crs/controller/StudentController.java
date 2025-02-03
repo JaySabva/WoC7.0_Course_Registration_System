@@ -8,6 +8,7 @@ import org.hibernate.ResourceClosedException;
 import org.jaysabva.woc_crs.dto.RequestDto;
 import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.entity.Request;
+import org.jaysabva.woc_crs.entity.Semester;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -73,13 +74,8 @@ public class StudentController {
         }
     }
 
-    @GetMapping("/get-all-requests")
-    public ResponseEntity<List<Request>> getAllRequest() {
-        return ResponseEntity.status(HttpStatus.OK).body(studentService.getAllRequests());
-    }
-
     @GetMapping("/get-registered-courses/{id}")
-    public ResponseEntity<List<Registration>> getRegisteredCourses(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Map<String, Object>>> getRegisteredCourses(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(studentService.getRegisteredCourses(id));
     }
 }

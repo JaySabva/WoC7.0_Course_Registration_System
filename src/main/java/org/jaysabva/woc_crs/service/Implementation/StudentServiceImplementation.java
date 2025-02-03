@@ -127,16 +127,41 @@ public class StudentServiceImplementation implements StudentService{
     }
 
     @Override
-    public List<Request> getAllRequests() {
-        List<Request> requests = requestRepository.findAll();
-
-        return requests;
-    }
-
-    @Override
-    public List<Registration> getRegisteredCourses(Long id) {
+    public Map<String, Map<String, Object>> getRegisteredCourses(Long id) {
         List<Registration> registrations = registrationRepository.findByStudent_Id(id);
+        Map<String, Map<String, Object>> registrationsMap = new HashMap<>();
 
-        return registrations;
+        for (Registration registration : registrations) {
+            Semester semester = registration.getSemester();
+
+            Map<String, Object> courseMap = new HashMap<>();
+            courseMap.put("id", registration.getCourse().getId());
+            courseMap.put("name", registration.getCourse().getCourseName());
+            courseMap.put("course code", registration.getCourse().getCourseCode());
+            courseMap.put("credits", registration.getCourse().getCredits());
+            courseMap.put("professor", registration.getCourse().getProfessor().getName());
+            courseMap.put("grade", registration.getGrade());
+
+            if (registrationsMap.containsKey(semester.getSemesterName())) {
+                ((List<Map<String, Object>>) registrationsMap.get(semester.getSemesterName()).get("Courses")).add(courseMap);
+            } else {
+                Map<String, Object> mainMap = new HashMap<>();
+                mainMap.put("semester-name", semester.getSemesterName());
+                mainMap.put("semester-id", semester.getId());
+                mainMap.put("start-date", semester.getStartDate());
+                mainMap.put("end-date", semester.getEndDate());
+                mainMap.put("registration-end-date", semester.getRegistrationEndDate());
+
+                List<Map<String, Object>> courseList = new ArrayList<>();
+                courseList.add(courseMap);
+                mainMap.put("Courses", courseList);
+
+                registrationsMap.put(semester.getSemesterName(), mainMap);
+            }
+        }
+
+        return registrationsMap;
     }
+
+
 }
