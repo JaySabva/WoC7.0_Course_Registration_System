@@ -9,6 +9,8 @@ import org.jaysabva.woc_crs.dto.RequestDto;
 import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.entity.Request;
 import org.jaysabva.woc_crs.entity.Semester;
+import org.jaysabva.woc_crs.util.Role;
+import org.jaysabva.woc_crs.util.RoleRequired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +26,8 @@ import java.util.*;
 @RequestMapping("/student")
 @Tag(name = "Student Controller", description = "APIs for Student")
 @Validated
+
+@RoleRequired(Role.STUDENT)
 public class StudentController {
 
     private final StudentService studentService;

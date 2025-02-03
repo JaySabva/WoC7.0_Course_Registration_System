@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
+import org.jaysabva.woc_crs.util.Role;
+import org.jaysabva.woc_crs.util.RoleRequired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +24,8 @@ import java.util.*;
 @RequestMapping("/professor")
 @Tag(name = "Professor Controller", description = "APIs for Professor")
 @Validated
+
+@RoleRequired(Role.PROFESSOR)
 public class ProfessorController {
 
     private final ProfessorService professorService;

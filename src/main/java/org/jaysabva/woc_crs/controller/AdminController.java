@@ -9,6 +9,8 @@ import org.jaysabva.woc_crs.entity.Course;
 import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.entity.Request;
 import org.jaysabva.woc_crs.util.EmailSenderService;
+import org.jaysabva.woc_crs.util.Role;
+import org.jaysabva.woc_crs.util.RoleRequired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,6 +28,8 @@ import java.util.*;
 @RequestMapping("/admin")
 @Tag(name = "Admin Controller", description = "APIs for Admin")
 @Validated
+
+@RoleRequired(Role.ADMIN)
 public class AdminController {
 
     private final AdminService adminService;
