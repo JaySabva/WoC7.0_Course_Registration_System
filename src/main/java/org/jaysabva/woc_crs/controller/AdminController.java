@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.jaysabva.woc_crs.dto.CourseDto;
 import org.jaysabva.woc_crs.entity.Course;
 import org.jaysabva.woc_crs.entity.Registration;
+import org.jaysabva.woc_crs.entity.Request;
 import org.jaysabva.woc_crs.util.EmailSenderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -232,5 +233,10 @@ public class AdminController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/get-all-requests")
+    public ResponseEntity<List<Request>> getAllRequest() {
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.getAllRequests());
     }
 }

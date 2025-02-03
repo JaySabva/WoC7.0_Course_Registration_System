@@ -366,4 +366,11 @@ public class AdminServiceImplementation implements AdminService {
 
          System.out.println("Email sent successfully");
     }
+
+    @Override
+    public List<Request> getAllRequests() {
+        List<Request> requests = requestRepository.findAll();
+
+        return requests;
+    }
 }
