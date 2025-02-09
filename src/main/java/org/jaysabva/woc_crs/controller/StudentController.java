@@ -5,6 +5,7 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.hibernate.ResourceClosedException;
+import org.jaysabva.woc_crs.config.JwtContext;
 import org.jaysabva.woc_crs.dto.RequestDto;
 import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.entity.Request;
@@ -37,9 +38,11 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    @PutMapping("/update-student/{email}")
-    public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDto studentDto, @PathVariable String email){
+    @PutMapping("/update-student")
+    public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDto studentDto){
         try{
+            String email = JwtContext.getEmail();
+
             String resultMessage = studentService.updateStudent(studentDto, email);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
         } catch(EntityNotFoundException e) {
@@ -51,9 +54,11 @@ public class StudentController {
         }
     }
 
-    @GetMapping("/get-student/{email}")
-    public ResponseEntity<Map<String, String>> getStudent(@PathVariable String email){
+    @GetMapping("/get-student")
+    public ResponseEntity<Map<String, String>> getStudent(){
         try{
+            String email = JwtContext.getEmail();
+
             Map<String, String> studentDto= studentService.getStudent(email);
 
             return ResponseEntity.status(HttpStatus.OK).body(studentDto);
@@ -67,6 +72,9 @@ public class StudentController {
     @PostMapping("/submit-course-form")
     public ResponseEntity<String> requestCourse(@RequestBody @Valid RequestDto requestDto){
         try{
+            Long studentId = JwtContext.getId();
+            requestDto = requestDto.withStudentId(studentId);
+
             String resultMessage = studentService.requestCourse(requestDto);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
         } catch(EntityNotFoundException e) {
@@ -78,8 +86,11 @@ public class StudentController {
         }
     }
 
-    @GetMapping("/get-registered-courses/{id}")
-    public ResponseEntity<Map<String, Map<String, Object>>> getRegisteredCourses(@PathVariable Long id) {
+    @GetMapping("/get-registered-courses/")
+    public ResponseEntity<Map<String, Map<String, Object>>> getRegisteredCourses() {
+        //TODO: Add Try Catch
+
+        Long id = JwtContext.getId();
         return ResponseEntity.status(HttpStatus.OK).body(studentService.getRegisteredCourses(id));
     }
 }
