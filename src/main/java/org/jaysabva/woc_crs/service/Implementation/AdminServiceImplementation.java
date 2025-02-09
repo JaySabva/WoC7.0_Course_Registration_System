@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.jaysabva.woc_crs.dto.*;
 import org.jaysabva.woc_crs.entity.*;
 import org.jaysabva.woc_crs.repository.*;
+import org.jaysabva.woc_crs.util.BCryptUtil;
 import org.jaysabva.woc_crs.util.EmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ public class AdminServiceImplementation implements AdminService {
         Student student = new Student(
             studentDto.name(),
             studentDto.email(),
-            studentDto.password()
+            BCryptUtil.hashPassword(studentDto.password())
         );
 
         try {
@@ -76,7 +77,7 @@ public class AdminServiceImplementation implements AdminService {
         Professor professor = new Professor(
             professorDto.name(),
             professorDto.email(),
-            professorDto.password()
+            BCryptUtil.hashPassword(professorDto.password())
         );
 
         try {
@@ -184,22 +185,10 @@ public class AdminServiceImplementation implements AdminService {
     }
 
     @Override
-    public List<SemesterDto> getAllSemesters() {
+    public List<Semester> getAllSemesters() {
         List<Semester> semesters = semesterRepository.findAll();
-        List<SemesterDto> semesterDtos = new ArrayList<>();
 
-        for (Semester semester : semesters) {
-            SemesterDto semesterDto = new SemesterDto(
-                semester.getSemesterName(),
-                semester.getStartDate().toString(),
-                semester.getEndDate().toString(),
-                semester.getRegistrationEndDate().toString(),
-                semester.getRegistrationStatus()
-            );
-            semesterDtos.add(semesterDto);
-        }
-
-        return semesterDtos;
+        return semesters;
     }
 
     @Override
