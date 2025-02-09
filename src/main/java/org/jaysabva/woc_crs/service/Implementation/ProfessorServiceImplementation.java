@@ -2,6 +2,7 @@ package org.jaysabva.woc_crs.service.Implementation;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.jaysabva.woc_crs.util.BCryptUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +40,7 @@ public class ProfessorServiceImplementation implements ProfessorService {
 
         professor.setName(professorDto.name());
         professor.setEmail(professorDto.email());
-        professor.setPassword(professorDto.password());
+        professor.setPassword(BCryptUtil.hashPassword(professorDto.password()));
 
         try {
             professorRepository.save(professor);
