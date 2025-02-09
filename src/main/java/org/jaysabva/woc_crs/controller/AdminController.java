@@ -8,6 +8,7 @@ import org.jaysabva.woc_crs.dto.CourseDto;
 import org.jaysabva.woc_crs.entity.Course;
 import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.entity.Request;
+import org.jaysabva.woc_crs.entity.Semester;
 import org.jaysabva.woc_crs.util.EmailSenderService;
 import org.jaysabva.woc_crs.util.Role;
 import org.jaysabva.woc_crs.util.RoleRequired;
@@ -139,9 +140,9 @@ public class AdminController {
     }
 
     @GetMapping("/get-all-semesters")
-    public ResponseEntity<List<SemesterDto>> getAllSemesters() {
+    public ResponseEntity<List<Semester>> getAllSemesters() {
         try {
-            List<SemesterDto> semesters = adminService.getAllSemesters();
+            List<Semester> semesters = adminService.getAllSemesters();
 
             return ResponseEntity.status(HttpStatus.OK).body(semesters);
         } catch (Exception e) {
