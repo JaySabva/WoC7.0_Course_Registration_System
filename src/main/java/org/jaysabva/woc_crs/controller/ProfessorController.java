@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
+import org.jaysabva.woc_crs.config.JwtContext;
 import org.jaysabva.woc_crs.util.Role;
 import org.jaysabva.woc_crs.util.RoleRequired;
 import org.springframework.http.HttpStatus;
@@ -35,9 +36,11 @@ public class ProfessorController {
         this.professorService = professorService;
     }
 
-    @PutMapping("/update-professor/{email}")
-    public ResponseEntity<String> updateProfessor(@RequestBody @Valid ProfessorDto professorDto, @PathVariable String email){
+    @PutMapping("/update-professor")
+    public ResponseEntity<String> updateProfessor(@RequestBody @Valid ProfessorDto professorDto){
         try{
+            String email = JwtContext.getEmail();
+
             String resultMessage = professorService.updateProfessor(professorDto, email);
             return ResponseEntity.status(HttpStatus.OK).body(resultMessage);
         } catch(EntityNotFoundException e){
@@ -47,9 +50,11 @@ public class ProfessorController {
         }
     }
 
-    @GetMapping("/get-professor/{email}")
-    public ResponseEntity<Map<String, String>> getProfessor(@PathVariable String email){
+    @GetMapping("/get-professor")
+    public ResponseEntity<Map<String, String>> getProfessor(){
         try{
+            String email = JwtContext.getEmail();
+
             Map<String, String> professorDto= professorService.getProfessor(email);
 
             return ResponseEntity.status(HttpStatus.OK).body(professorDto);
