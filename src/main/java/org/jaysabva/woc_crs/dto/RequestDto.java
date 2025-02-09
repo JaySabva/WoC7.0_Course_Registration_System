@@ -9,4 +9,7 @@ public record RequestDto(
         @NotNull List<Integer> courseIds,
         @NotBlank String requestDate,
         @NotNull Long studentId) {
+    public RequestDto withStudentId(Long studentId) {
+        return new RequestDto(courseIds(), requestDate(), studentId);
+    }
 }
