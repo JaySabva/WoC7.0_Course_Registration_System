@@ -4,6 +4,7 @@ import org.jaysabva.woc_crs.dto.*;
 import org.jaysabva.woc_crs.entity.Course;
 import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.entity.Request;
+import org.jaysabva.woc_crs.entity.Semester;
 
 import java.util.*;
 
@@ -23,7 +24,7 @@ public interface AdminService {
 
     String deleteSemester(Long id);
 
-    List<SemesterDto> getAllSemesters();
+    List<Semester> getAllSemesters();
 
     String addCourse(CourseDto courseDto);
 
