@@ -5,6 +5,7 @@ import org.hibernate.ResourceClosedException;
 import org.jaysabva.woc_crs.dto.RequestDto;
 import org.jaysabva.woc_crs.entity.*;
 import org.jaysabva.woc_crs.repository.*;
+import org.jaysabva.woc_crs.util.BCryptUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,13 +45,13 @@ public class StudentServiceImplementation implements StudentService{
             throw new EntityNotFoundException("Student with this email does not exist");
         }
 
-        if(studentRepository.findByEmail(studentDto.email()) != null) {
+        if(!Objects.equals(student.getEmail(), studentDto.email()) && studentRepository.findByEmail(studentDto.email()) != null) {
             throw new EntityExistsException("Student with this email already exists");
         }
 
         student.setName(studentDto.name());
         student.setEmail(studentDto.email());
-        student.setPassword(studentDto.password());
+        student.setPassword(BCryptUtil.hashPassword(studentDto.password()));
 
         try {
             studentRepository.save(student);
