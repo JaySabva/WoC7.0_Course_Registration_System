@@ -11,9 +11,11 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
-    private String jwtSecret = "KVf31ptREXk3nDAObsjSDh/PxB6Qe8gtkI98iFX2209vwrI+rjdSxp4erGna2QCVkFihFuV8V+3uFEVjeVuMbQ==";
+    @Value("${jwtSecret}")
+    private String jwtSecret;
 
-    private long jwtExpirationInMs = 604800000;
+    @Value("${jwtExpirationInMs}")
+    private long jwtExpirationInMs;
 
     public String generateToken(String id, String email, String role) {
         Date now = new Date();
