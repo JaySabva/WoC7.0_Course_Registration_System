@@ -7,14 +7,19 @@ WORKDIR /app
 # Copy the pom.xml and download dependencies
 COPY pom.xml .
 
-# Use Maven to build the application (skip tests for faster build)
-RUN mvn clean install -DskipTests
-
 # Copy the rest of the application code
 COPY src ./src
 
+COPY mvnw .
+COPY .mvn .mvn
+
+RUN chmod +x ./mvnw
+
+# Use Maven to build the application (skip tests for faster build)
+RUN ./mvnw clean install -DskipTests
+
 # Package the application into a runnable JAR
-RUN mvn clean package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 # Set the command to run the application
 ENTRYPOINT ["java", "-jar", "target/WoC_CRS-0.0.1-SNAPSHOT.jar"]
