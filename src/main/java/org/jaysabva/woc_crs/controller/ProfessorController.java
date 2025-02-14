@@ -64,4 +64,19 @@ public class ProfessorController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<>());
         }
     }
+
+    @GetMapping("/get-all-courses")
+    public ResponseEntity<Map<String, Map<String, Object>>> getCAllCourses() {
+        try {
+            Long professorId = JwtContext.getId();
+
+            Map<String, Map<String, Object>> courses = professorService.getAllCourses(professorId);
+
+            return ResponseEntity.status(HttpStatus.OK).body(courses);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new HashMap<>());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<>());
+        }
+    }
 }

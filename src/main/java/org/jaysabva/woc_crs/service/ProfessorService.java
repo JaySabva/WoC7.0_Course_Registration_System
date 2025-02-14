@@ -7,4 +7,5 @@ import java.util.*;
 public interface ProfessorService {
     String updateProfessor(ProfessorDto professorDto, String email);
     Map<String, String> getProfessor(String email);
+    Map<String, Map<String, Object>> getAllCourses(Long professorId);
 }
