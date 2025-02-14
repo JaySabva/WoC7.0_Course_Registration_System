@@ -12,8 +12,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 
 @Entity
 @Table(name = "courses")

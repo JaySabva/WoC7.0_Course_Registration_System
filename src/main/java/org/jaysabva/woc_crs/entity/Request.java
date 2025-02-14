@@ -12,8 +12,6 @@ import java.util.List;
 
 @Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 
 @Entity
 @Table(name = "requests")

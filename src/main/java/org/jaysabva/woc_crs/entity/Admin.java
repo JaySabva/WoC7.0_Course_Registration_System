@@ -6,8 +6,6 @@ import lombok.*;
 
 @Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 
 @Entity
 @Table(name = "admin")

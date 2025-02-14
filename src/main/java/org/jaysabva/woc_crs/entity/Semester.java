@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 
 @Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 
 @Entity
 @Table(name = "semesters")
