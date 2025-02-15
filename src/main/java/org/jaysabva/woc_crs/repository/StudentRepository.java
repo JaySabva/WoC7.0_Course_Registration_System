@@ -9,4 +9,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     void deleteByEmail(String email);
 
     Integer countByBatchAndDepartment(Integer batch, Department departmentAbvName);
+
+    boolean existsByEmail(String email);
 }

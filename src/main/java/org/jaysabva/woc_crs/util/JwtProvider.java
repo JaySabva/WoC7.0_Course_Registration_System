@@ -42,4 +42,16 @@ public class JwtProvider {
             throw new IllegalArgumentException("Invalid JWT token");
         }
     }
+
+    public String passwordResetToken(String email) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + 500000);
+
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+    }
 }
