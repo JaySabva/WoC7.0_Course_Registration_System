@@ -5,7 +5,9 @@ import org.jaysabva.woc_crs.entity.Course;
 import org.jaysabva.woc_crs.entity.Registration;
 import org.jaysabva.woc_crs.entity.Request;
 import org.jaysabva.woc_crs.entity.Semester;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 
 public interface AdminService {
@@ -43,4 +45,6 @@ public interface AdminService {
     void sendCourseAssignEmailNotification();
 
     List<Request> getAllRequests();
+
+    void assignGradesForCourse(MultipartFile file, Long courseId) throws IOException;
 }

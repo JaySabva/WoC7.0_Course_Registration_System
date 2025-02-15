@@ -2,6 +2,10 @@ package org.jaysabva.woc_crs.service.Implementation;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jaysabva.woc_crs.dto.*;
 import org.jaysabva.woc_crs.entity.*;
 import org.jaysabva.woc_crs.repository.*;
@@ -12,7 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import org.jaysabva.woc_crs.service.AdminService;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -366,5 +373,40 @@ public class AdminServiceImplementation implements AdminService {
         List<Request> requests = requestRepository.findAll();
 
         return requests;
+    }
+
+    @Override
+    public void assignGradesForCourse(MultipartFile file, Long courseId) throws IOException {
+        List<Registration> registrations = registrationRepository.findByCourse_Id(courseId);
+
+        InputStream is = file.getInputStream();
+        Workbook workbook = new XSSFWorkbook(is);
+        Sheet sheet = workbook.getSheetAt(0);
+
+        Map<Long, String> gradeMap = new HashMap<>();
+        for (Row row : sheet) {
+            if (row.getRowNum() == 0) {
+                continue;
+            }
+
+            String studentId = row.getCell(0).getStringCellValue();
+            String grade = row.getCell(1).getStringCellValue();
+
+            gradeMap.put(Long.valueOf(studentId), grade);
+        }
+
+        workbook.close();
+
+        try {
+            for (Registration registration : registrations) {
+                if (gradeMap.containsKey(registration.getStudent().getId())) {
+                    registration.setGrade(gradeMap.get(registration.getStudent().getId()));
+                    registrationRepository.save(registration);
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update grades for course", e);
+        }
     }
 }

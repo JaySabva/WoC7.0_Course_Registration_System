@@ -22,6 +22,7 @@ import org.jaysabva.woc_crs.service.AdminService;
 import org.jaysabva.woc_crs.dto.StudentDto;
 import org.jaysabva.woc_crs.dto.ProfessorDto;
 import org.jaysabva.woc_crs.dto.SemesterDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -243,5 +244,16 @@ public class AdminController {
     @GetMapping("/get-all-requests")
     public ResponseEntity<List<Request>> getAllRequest() {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.getAllRequests());
+    }
+
+    @PostMapping("/assign-grades-for-course/{courseID}")
+    public ResponseEntity<String> assignGradesForCourse(@RequestParam("file") MultipartFile file, @PathVariable Long courseID) {
+        try {
+            adminService.assignGradesForCourse(file, courseID);
+
+            return ResponseEntity.status(HttpStatus.OK).body("Grades assigned successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unexpected error occurred: " + e.getMessage());
+        }
     }
 }
