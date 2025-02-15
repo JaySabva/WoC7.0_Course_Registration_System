@@ -90,8 +90,8 @@ public class Student {
         return department;
     }
 
-    public void setDepartment(Department department) {
-        this.department = department;
+    public void setDepartment(String department) {
+        this.department = Department.valueOf(department);
     }
 
     public Integer getRollNo() {

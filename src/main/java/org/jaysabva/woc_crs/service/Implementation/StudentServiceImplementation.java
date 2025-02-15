@@ -49,9 +49,11 @@ public class StudentServiceImplementation implements StudentService{
             throw new EntityExistsException("Student with this email already exists");
         }
 
-        student.setName(studentDto.name());
-        student.setEmail(studentDto.email());
-        student.setPassword(BCryptUtil.hashPassword(studentDto.password()));
+        student.setName(studentDto.name() != null ? studentDto.name() : student.getName());
+        student.setEmail(studentDto.email() != null ? studentDto.email() : student.getEmail());
+        student.setPassword(studentDto.password() != null ? BCryptUtil.hashPassword(studentDto.password()) : student.getPassword());
+        student.setBatch(studentDto.batch() != null ? studentDto.batch() : student.getBatch());
+        student.setDepartment(studentDto.department() != null ? studentDto.department() : student.getDepartment().toString());
 
         try {
             studentRepository.save(student);
@@ -68,9 +70,12 @@ public class StudentServiceImplementation implements StudentService{
         if(student == null){
             throw new EntityNotFoundException("Student with this email does not exist");
         }
-        return new HashMap<>(){{
+        return new LinkedHashMap<>(){{
+            put("id", student.getId().toString());
             put("name", student.getName());
             put("email", student.getEmail());
+            put("batch", student.getBatch().toString());
+            put("department", student.getDepartment().getName());
         }};
     }
 
