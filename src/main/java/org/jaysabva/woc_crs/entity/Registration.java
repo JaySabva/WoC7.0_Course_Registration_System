@@ -34,7 +34,7 @@ public class Registration {
 
     private LocalDateTime registrationDate;
 
-    private Long grade;
+    private Grade grade;
 
     public Registration() {
     }
@@ -44,7 +44,7 @@ public class Registration {
         this.course = course;
         this.semester = semester;
         this.registrationDate = LocalDateTime.parse(registrationDate);
-        this.grade = -1L;
+        grade = Grade.I;
     }
 
     public Long getId() {
@@ -87,11 +87,11 @@ public class Registration {
         this.registrationDate = LocalDateTime.parse(registrationDate);
     }
 
-    public Long getGrade() {
+    public Grade getGrade() {
         return grade;
     }
 
-    public void setGrade(Long grade) {
-        this.grade = grade;
+    public void setGrade(String grade) {
+        this.grade = Grade.valueOf(grade);
     }
 }
