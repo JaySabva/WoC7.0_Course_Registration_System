@@ -52,10 +52,15 @@ public class AdminServiceImplementation implements AdminService {
             throw new EntityExistsException("Student with this email already exists");
         }
 
+        Integer rollNo = studentRepository.countByBatchAndDepartment(studentDto.batch(), Department.valueOf(studentDto.department())) + 1;
+
         Student student = new Student(
             studentDto.name(),
             studentDto.email(),
-            BCryptUtil.hashPassword(studentDto.password())
+            BCryptUtil.hashPassword(studentDto.password()),
+            studentDto.batch(),
+            studentDto.department(),
+            rollNo
         );
 
         try {
