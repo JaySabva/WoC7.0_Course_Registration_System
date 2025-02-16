@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -18,6 +19,8 @@ public class Transcript {
     private LocalDateTime startDate;
 
     private List<Object> courses;
+
+    private Map<String, Object> grades;
 
     public Long getStudentID() {
         return studentID;
@@ -73,5 +76,13 @@ public class Transcript {
 
     public void setCourses(List<Object> courses) {
         this.courses = courses;
+    }
+
+    public Map<String, Object> getGrades() {
+        return grades;
+    }
+
+    public void setGrades(Map<String, Object> grades) {
+        this.grades = grades;
     }
 }

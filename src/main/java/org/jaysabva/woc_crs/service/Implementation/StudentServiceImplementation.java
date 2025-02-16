@@ -230,6 +230,10 @@ public class StudentServiceImplementation implements StudentService{
         transcript.setStartDate(semester.getStartDate());
 
         List<Object> courses = new ArrayList<>();
+        double totalCredits = 0.0;
+        double totalCreditEarned = 0.0;
+        double gradePoints = 0.0;
+        double gpa = 0.0;
         for (Registration registration : registrations) {
             Map<String, Object> courseMap = new LinkedHashMap<>();
             courseMap.put("courseName", registration.getCourse().getCourseName());
@@ -240,9 +244,20 @@ public class StudentServiceImplementation implements StudentService{
             courseMap.put("gradePoint", registration.getGrade().getGradePoint() * registration.getCourse().getCredits());
 
             courses.add(courseMap);
+
+            totalCredits += registration.getCourse().getCredits();
+            totalCreditEarned += registration.getGrade().isPassing() ? registration.getCourse().getCredits() : 0;
+            gradePoints += (registration.getCourse().getCredits() * registration.getGrade().getGradePoint());
         }
         transcript.setCourses(courses);
 
+        Map<String, Object> grades = new LinkedHashMap<>();
+        grades.put("creditRegistered", totalCredits);
+        grades.put("creditEarned", totalCreditEarned);
+        grades.put("gradePoints", gradePoints);
+        grades.put("gpa", totalCreditEarned == 0 ? "N/A" : gradePoints / totalCreditEarned);
+
+        transcript.setGrades(grades);
         try {
             return pdfGenerationService.generateTranscript(transcript);
         } catch (Exception e) {
