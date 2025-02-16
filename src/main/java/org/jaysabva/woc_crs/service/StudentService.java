@@ -16,4 +16,6 @@ public interface StudentService {
     Map<String, Map<String, Object>> getRegisteredCourses(Long id);
 
     Map<String, Object> getRegisteredCourses(Long id, Long semesterID);
+
+    byte[] generateTranscript(Long studentID, Long semesterID);
 }

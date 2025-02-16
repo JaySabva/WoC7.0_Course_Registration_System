@@ -3,9 +3,11 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.ResourceClosedException;
 import org.jaysabva.woc_crs.dto.RequestDto;
+import org.jaysabva.woc_crs.dto.Transcript;
 import org.jaysabva.woc_crs.entity.*;
 import org.jaysabva.woc_crs.repository.*;
 import org.jaysabva.woc_crs.util.BCryptUtil;
+import org.jaysabva.woc_crs.util.PdfGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,18 +25,20 @@ public class StudentServiceImplementation implements StudentService{
     private final RequestRepository requestRepository;
     private final SemesterRepository semesterRepository;
     private final RegistrationRepository registrationRepository;
+    private final PdfGenerationService pdfGenerationService;
 
     @Autowired
     public StudentServiceImplementation(
             StudentRepository studentRepository,
             CourseRepository courseRepository,
             RequestRepository requestRepository,
-            SemesterRepository semesterRepository, RegistrationRepository registrationRepository) {
+            SemesterRepository semesterRepository, RegistrationRepository registrationRepository, PdfGenerationService pdfGenerationService) {
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
         this.requestRepository = requestRepository;
         this.semesterRepository = semesterRepository;
         this.registrationRepository = registrationRepository;
+        this.pdfGenerationService = pdfGenerationService;
     }
 
     @Override
@@ -209,5 +213,40 @@ public class StudentServiceImplementation implements StudentService{
         registrationsMap.put("GPA", totalCreditEarned == 0 ? "N/A" : gradePoints / totalCreditEarned);
 
         return registrationsMap;
+    }
+
+    @Override
+    public byte[] generateTranscript(Long id, Long semesterID) {
+        Student student = studentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Student with this id does not exist"));
+        Semester semester = semesterRepository.findById(semesterID).orElseThrow(() -> new EntityNotFoundException("Semester with this id does not exist"));
+        List<Registration> registrations = registrationRepository.findByStudent_IdAndSemester_Id(id, semesterID);
+
+        Transcript transcript = new Transcript();
+        transcript.setStudentID(student.getId());
+        transcript.setStudentName(student.getName());
+        transcript.setBatch(Long.valueOf(student.getBatch()));
+        transcript.setDepartment(student.getDepartment().getName());
+        transcript.setSemesterName(semester.getSemesterName());
+        transcript.setStartDate(semester.getStartDate());
+
+        List<Object> courses = new ArrayList<>();
+        for (Registration registration : registrations) {
+            Map<String, Object> courseMap = new LinkedHashMap<>();
+            courseMap.put("courseName", registration.getCourse().getCourseName());
+            courseMap.put("courseCode", registration.getCourse().getCourseCode());
+            courseMap.put("credits", registration.getCourse().getCredits());
+            courseMap.put("professor", registration.getCourse().getProfessor().getName());
+            courseMap.put("grade", registration.getGrade().toString());
+            courseMap.put("gradePoint", registration.getGrade().getGradePoint() * registration.getCourse().getCredits());
+
+            courses.add(courseMap);
+        }
+        transcript.setCourses(courses);
+
+        try {
+            return pdfGenerationService.generateTranscript(transcript);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to generate transcript");
+        }
     }
 }

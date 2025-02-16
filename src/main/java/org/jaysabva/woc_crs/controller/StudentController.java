@@ -12,7 +12,9 @@ import org.jaysabva.woc_crs.entity.Request;
 import org.jaysabva.woc_crs.entity.Semester;
 import org.jaysabva.woc_crs.util.Role;
 import org.jaysabva.woc_crs.util.RoleRequired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -104,6 +106,16 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.OK).body(studentService.getRegisteredCourses(id, semesterID));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<>());
+        }
+    }
+
+    @GetMapping("/get-transcript/{semesterID}")
+    public ResponseEntity<byte[]> generateTranscript(@PathVariable Long semesterID) {
+        try {
+            Long id = JwtContext.getId();
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=transcript.pdf").contentType(MediaType.APPLICATION_PDF).body(studentService.generateTranscript(id, semesterID));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new byte[0]);
         }
     }
 }
