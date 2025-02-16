@@ -16,10 +16,7 @@ import org.jaysabva.woc_crs.entity.Professor;
 import org.jaysabva.woc_crs.dto.ProfessorDto;
 import org.jaysabva.woc_crs.repository.ProfessorRepository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ProfessorServiceImplementation implements ProfessorService {
@@ -74,11 +71,11 @@ public class ProfessorServiceImplementation implements ProfessorService {
     public Map<String, Map<String, Object>> getAllCourses(Long professorId){
         List<Course> courses = courseRepository.findByProfessor_Id(professorId);
 
-        Map<String, Map<String, Object>> courseMap = new HashMap<>();
+        Map<String, Map<String, Object>> courseMap = new LinkedHashMap<>();
         for(Course course: courses) {
             Semester semester = course.getSemester();
 
-            Map<String, Object> courseDetails = new HashMap<>();
+            Map<String, Object> courseDetails = new LinkedHashMap<>();
             courseDetails.put("id", course.getId());
             courseDetails.put("name", course.getCourseName());
             courseDetails.put("course code", course.getCourseCode());
@@ -89,7 +86,7 @@ public class ProfessorServiceImplementation implements ProfessorService {
             if (courseMap.containsKey(semester.getSemesterName())) {
                 ((List<Map<String, Object>>) courseMap.get(semester.getSemesterName()).get("Courses")).add(courseDetails);
             } else {
-                Map<String, Object> mainMap = new HashMap<>();
+                Map<String, Object> mainMap = new LinkedHashMap<>();
                 mainMap.put("semester-name", semester.getSemesterName());
                 mainMap.put("semester-id", semester.getId());
                 mainMap.put("start-date", semester.getStartDate());
