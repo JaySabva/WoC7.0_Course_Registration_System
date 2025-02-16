@@ -21,4 +21,8 @@ public enum Grade {
     public int getGradePoint() {
         return gradePoint;
     }
+
+    public boolean isPassing() {
+        return this != F && this != I;
+    }
 }

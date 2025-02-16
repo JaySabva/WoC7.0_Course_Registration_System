@@ -135,12 +135,12 @@ public class StudentServiceImplementation implements StudentService{
     @Override
     public Map<String, Map<String, Object>> getRegisteredCourses(Long id) {
         List<Registration> registrations = registrationRepository.findByStudent_Id(id);
-        Map<String, Map<String, Object>> registrationsMap = new HashMap<>();
+        Map<String, Map<String, Object>> registrationsMap = new LinkedHashMap<>();
 
         for (Registration registration : registrations) {
             Semester semester = registration.getSemester();
 
-            Map<String, Object> courseMap = new HashMap<>();
+            Map<String, Object> courseMap = new LinkedHashMap<>();
             courseMap.put("id", registration.getCourse().getId());
             courseMap.put("name", registration.getCourse().getCourseName());
             courseMap.put("course code", registration.getCourse().getCourseCode());
@@ -151,7 +151,7 @@ public class StudentServiceImplementation implements StudentService{
             if (registrationsMap.containsKey(semester.getSemesterName())) {
                 ((List<Map<String, Object>>) registrationsMap.get(semester.getSemesterName()).get("Courses")).add(courseMap);
             } else {
-                Map<String, Object> mainMap = new HashMap<>();
+                Map<String, Object> mainMap = new LinkedHashMap<>();
                 mainMap.put("semester-name", semester.getSemesterName());
                 mainMap.put("semester-id", semester.getId());
                 mainMap.put("start-date", semester.getStartDate());
@@ -169,5 +169,45 @@ public class StudentServiceImplementation implements StudentService{
         return registrationsMap;
     }
 
+    @Override
+    public Map<String, Object> getRegisteredCourses(Long id, Long semesterID) {
+        List<Registration> registrations = registrationRepository.findByStudent_IdAndSemester_Id(id, semesterID);
+        Map<String, Object> registrationsMap = new LinkedHashMap<>();
 
+        registrationsMap.put("semester-name", registrations.getFirst().getSemester().getSemesterName());
+        registrationsMap.put("semester-id", registrations.getFirst().getSemester().getId());
+        registrationsMap.put("start-date", registrations.getFirst().getSemester().getStartDate());
+        registrationsMap.put("end-date", registrations.getFirst().getSemester().getEndDate());
+        registrationsMap.put("registration-end-date", registrations.getFirst().getSemester().getRegistrationEndDate());
+
+        List<Map<String, Object>> courseList = new ArrayList<>();
+        double totalCredits = 0.0;
+        double totalCreditEarned = 0.0;
+        double gradePoints = 0.0;
+        double gpa = 0.0;
+        for (Registration registration : registrations) {
+            Map<String, Object> courseMap = new LinkedHashMap<>();
+            courseMap.put("id", registration.getCourse().getId());
+            courseMap.put("name", registration.getCourse().getCourseName());
+            courseMap.put("course code", registration.getCourse().getCourseCode());
+            courseMap.put("credits", registration.getCourse().getCredits());
+            courseMap.put("professor", registration.getCourse().getProfessor().getName());
+            courseMap.put("grade", registration.getGrade());
+            courseMap.put("grade point", registration.getGrade().getGradePoint() * registration.getCourse().getCredits());
+
+            courseList.add(courseMap);
+
+            totalCredits += registration.getCourse().getCredits();
+            totalCreditEarned += registration.getGrade().isPassing() ? registration.getCourse().getCredits() : 0;
+            gradePoints += (registration.getCourse().getCredits() * registration.getGrade().getGradePoint());
+        }
+
+        registrationsMap.put("Courses", courseList);
+        registrationsMap.put("Credits Registered", totalCredits);
+        registrationsMap.put("Credits Earned", totalCreditEarned);
+        registrationsMap.put("Grade Points Earned", gradePoints);
+        registrationsMap.put("GPA", totalCreditEarned == 0 ? "N/A" : gradePoints / totalCreditEarned);
+
+        return registrationsMap;
+    }
 }

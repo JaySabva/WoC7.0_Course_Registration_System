@@ -88,9 +88,22 @@ public class StudentController {
 
     @GetMapping("/get-registered-courses/")
     public ResponseEntity<Map<String, Map<String, Object>>> getRegisteredCourses() {
-        //TODO: Add Try Catch
+        try {
+            Long id = JwtContext.getId();
 
-        Long id = JwtContext.getId();
-        return ResponseEntity.status(HttpStatus.OK).body(studentService.getRegisteredCourses(id));
+            return ResponseEntity.status(HttpStatus.OK).body(studentService.getRegisteredCourses(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<>());
+        }
+    }
+
+    @GetMapping("/get-registered-courses/{semesterID}")
+    public ResponseEntity<Map<String, Object>> getRegisteredCourses(@PathVariable Long semesterID) {
+        try {
+            Long id = JwtContext.getId();
+            return ResponseEntity.status(HttpStatus.OK).body(studentService.getRegisteredCourses(id, semesterID));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new HashMap<>());
+        }
     }
 }

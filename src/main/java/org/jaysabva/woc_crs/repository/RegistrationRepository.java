@@ -13,4 +13,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     List<Registration> findByStudent_Id(Long studentId);
 
     List<Registration> findByCourse_Id(Long courseId);
+
+    List<Registration> findByStudent_IdAndSemester_Id(Long id, Long semesterID);
 }

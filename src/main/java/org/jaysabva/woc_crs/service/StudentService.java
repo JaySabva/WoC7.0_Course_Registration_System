@@ -14,4 +14,6 @@ public interface StudentService {
 
     String requestCourse(RequestDto requestDto);
     Map<String, Map<String, Object>> getRegisteredCourses(Long id);
+
+    Map<String, Object> getRegisteredCourses(Long id, Long semesterID);
 }

@@ -44,7 +44,7 @@ public class Registration {
         this.course = course;
         this.semester = semester;
         this.registrationDate = LocalDateTime.parse(registrationDate);
-        grade = Grade.I;
+        this.grade = Grade.I;
     }
 
     public Long getId() {
