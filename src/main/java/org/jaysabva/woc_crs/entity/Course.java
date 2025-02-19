@@ -35,6 +35,7 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "professor_id", referencedColumnName = "id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Professor professor;
 
     @ManyToOne
